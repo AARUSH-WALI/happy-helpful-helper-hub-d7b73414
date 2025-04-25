@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Upload, FileText, File as FileIcon, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -104,21 +105,91 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
       // Convert file to base64 for sending to Gemini API
       const fileBase64 = await readFileAsBase64(file);
       
-      // In a real implementation, here we'd send the base64 to Gemini API
-      // For now, we'll simulate with structured mock data that matches our new schema
+      // Prepare the request to Gemini API
+      const geminiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+      const prompt = `
+        I have a resume in ${file.type.includes("pdf") ? "PDF" : "DOCX"} format. 
+        Parse the following resume and return ONLY a JSON object with these fields:
+        - personalInfo: object with name, email, phone, address, summary
+        - education: array of objects with institution, degree, field, startDate, endDate, gpa
+        - experience: array of objects with company, position, startDate, endDate, description, location
+        - skills: array of skills
+        - ugInstitute: string (undergraduate institution name)
+        - pgInstitute: string (postgraduate institution name)
+        - phdInstitute: number (0 for no, 1 for yes)
+        - longevityYears: number (working years count)
+        - numberOfJobs: number
+        - averageExperience: number (longevity/number of jobs)
+        - skillsCount: number
+        - achievementsCount: number
+        - achievements: array of strings
+        - trainingsCount: number
+        - trainings: array of strings
+        - workshopsCount: number
+        - workshops: array of strings
+        - researchPapers: array of strings
+        - patents: array of strings
+        - books: array of strings
+        - isJK: number (0 for no, 1 for yes - for J&K resident)
+        - projectsCount: number
+        - projects: array of strings
+        
+        Please make sure the format matches exactly, and all fields are included. 
+        Don't add any explanations, just return the JSON.
+      `;
       
       try {
-        // Simulate API call delay
+        // Simulate the actual API call with a delay for demonstration
+        // In a real implementation, uncomment the fetch block below
+        /*
+        const response = await fetch(`${geminiEndpoint}?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  { text: prompt },
+                  { inlineData: { mimeType: file.type, data: fileBase64 } }
+                ]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.1,
+              maxOutputTokens: 2048,
+              topP: 0.95,
+              topK: 40
+            }
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error.message || "Failed to parse resume");
+        }
+        
+        const parsedContent = data.candidates[0].content.parts[0].text;
+        const jsonMatch = parsedContent.match(/```json\n([\s\S]*?)\n```/) || 
+                          parsedContent.match(/\{[\s\S]*\}/);
+        
+        const cleanedJson = jsonMatch ? jsonMatch[1] || jsonMatch[0] : parsedContent;
+        const parsedResumeData = JSON.parse(cleanedJson);
+        */
+
+        // For demonstration, create sample data that matches our schema
         await new Promise(resolve => setTimeout(resolve, 2000));
         
-        // Create structured mock data that includes all our new fields
+        // Mock data that matches our schema exactly
         const parsedResumeData: ResumeData = {
           personalInfo: {
             name: "Saksham Gupta",
             email: "2022a6041@mietjammu.in",
             phone: "+91 9876543210",
             address: "Jammu, Jammu and Kashmir, India",
-            summary: "Experienced software engineer with a focus on frontend development and AI applications."
+            summary: "Computer Science student at MIET Jammu with experience in full-stack development and machine learning. Passionate about creating innovative solutions and contributing to open-source projects."
           },
           education: [
             {
@@ -136,30 +207,54 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
               position: "Software Engineering Intern",
               startDate: "May 2023",
               endDate: "August 2023",
-              description: "Worked on frontend development using React and TypeScript. Implemented responsive designs and optimized performance.",
+              description: "Developed a web application using React, TypeScript, and Node.js. Implemented responsive designs and RESTful APIs. Collaborated with cross-functional teams to deliver features on time.",
               location: "Remote"
+            },
+            {
+              company: "AI Solutions Ltd.",
+              position: "Machine Learning Intern",
+              startDate: "January 2023",
+              endDate: "April 2023",
+              description: "Worked on image classification models using TensorFlow. Improved model accuracy by 15% through data augmentation and hyperparameter tuning.",
+              location: "Jammu, J&K"
             }
           ],
-          skills: ["React", "JavaScript", "TypeScript", "HTML/CSS", "Node.js", "Git", "Python", "UI/UX Design"],
+          skills: ["React", "JavaScript", "TypeScript", "Python", "TensorFlow", "Node.js", "MongoDB", "Git", "AWS", "Docker", "HTML/CSS", "UI/UX Design"],
           ugInstitute: "MIET Jammu",
           pgInstitute: "", 
           phdInstitute: 0,
-          longevityYears: 1,
-          numberOfJobs: 1,
-          averageExperience: 1,
-          skillsCount: 8,
-          achievementsCount: 2,
-          achievements: ["Dean's List 2023", "Hackathon Winner 2022"],
-          trainingsCount: 1,
-          trainings: ["Web Development Bootcamp"],
+          longevityYears: 1.5,
+          numberOfJobs: 2,
+          averageExperience: 0.75,
+          skillsCount: 12,
+          achievementsCount: 3,
+          achievements: [
+            "Dean's List 2023", 
+            "Winner, National Coding Hackathon 2022", 
+            "Best Project Award, College Tech Fest 2022"
+          ],
+          trainingsCount: 2,
+          trainings: [
+            "Full Stack Development Bootcamp, Udemy",
+            "Machine Learning Specialization, Coursera"
+          ],
           workshopsCount: 2,
-          workshops: ["AI/ML Workshop", "Cloud Computing Workshop"],
-          researchPapers: [],
+          workshops: [
+            "AI/ML Workshop by Google Developers",
+            "Cloud Computing Workshop by AWS"
+          ],
+          researchPapers: [
+            "Application of Deep Learning in Medical Image Analysis"
+          ],
           patents: [],
           books: [],
           isJK: 1,
-          projectsCount: 2,
-          projects: ["E-Learning Platform", "AI-based Recommendation System"]
+          projectsCount: 3,
+          projects: [
+            "E-Learning Platform with AI Recommendations",
+            "Real-time Chat Application with End-to-End Encryption",
+            "Smart Home Automation System using IoT"
+          ]
         };
         
         // Clear progress interval and set to 100%
@@ -228,7 +323,9 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
           onChange={handleFileChange}
         />
         <div className="flex flex-col items-center gap-4">
-          {getFileIcon()}
+          <div className="w-16 h-16 flex items-center justify-center bg-purple-50 rounded-full">
+            {getFileIcon()}
+          </div>
           
           <div>
             {!file && (
@@ -266,7 +363,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
           </Button>
           <Button 
             onClick={parseResume}
-            className="bg-purple-600 hover:bg-purple-700"
+            className="bg-purple-600 hover:bg-purple-700 text-white"
           >
             Parse Resume
           </Button>
