@@ -5,7 +5,8 @@ import {
   Users, 
   Briefcase, 
   CalendarDays, 
-  Menu
+  Menu,
+  FileText
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,11 @@ export default function Sidebar() {
       name: "Interview",
       path: "/interview",
       icon: CalendarDays,
+    },
+    {
+      name: "Resume",
+      path: "/resume",
+      icon: FileText,
     },
   ];
   

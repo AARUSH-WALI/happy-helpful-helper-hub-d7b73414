@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import Jobs from "./pages/Jobs";
 import Interview from "./pages/Interview";
+import Resume from "./pages/Resume";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,11 @@ const App = () => (
           <Route path="/interview" element={
             <MainLayout>
               <Interview />
+            </MainLayout>
+          } />
+          <Route path="/resume" element={
+            <MainLayout>
+              <Resume />
             </MainLayout>
           } />
           <Route path="*" element={<NotFound />} />
