@@ -1,13 +1,37 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { DashboardLayout } from "@/components/DashboardLayout";
+import { TaskList } from "@/components/TaskList";
+import { PomodoroTimer } from "@/components/PomodoroTimer";
+import { QuickNotes } from "@/components/QuickNotes";
+import { SummaryStats } from "@/components/SummaryStats";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <DashboardLayout>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold mb-2">Welcome Back!</h1>
+        <p className="text-gray-500">
+          Here's an overview of your productivity today.
+        </p>
       </div>
-    </div>
+
+      <section className="mb-8">
+        <SummaryStats />
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <section>
+          <TaskList />
+        </section>
+        <section>
+          <PomodoroTimer />
+        </section>
+      </div>
+
+      <section>
+        <QuickNotes />
+      </section>
+    </DashboardLayout>
   );
 };
 
