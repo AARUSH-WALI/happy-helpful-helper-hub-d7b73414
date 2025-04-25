@@ -22,11 +22,71 @@ const vacancyData = [
 ];
 
 const candidates = [
-  { name: "Saksham Gupta", email: "2022a6041@mietjammu.in", fitmentScore: 65.5 },
-  { name: "Ayush Thakur", email: "ayushthakur1412@gmail.com", fitmentScore: 69.94 },
-  { name: "Adishwar Sharma", email: "2021a1045@mietjammu.in", fitmentScore: 72.58 },
-  { name: "Garima Saigal", email: "garimasaigal02@gmail.com", fitmentScore: 55.32 },
-  { name: "Aarush Wali", email: "2022A6002@mietjammu.in", fitmentScore: 62.45 }
+  { 
+    name: "Saksham Gupta", 
+    email: "2022a6041@mietjammu.in", 
+    fitmentScore: 65.5,
+    phone: "+91 9876543210",
+    education: "Ph.D. in Computer Science",
+    experience: "3+ Years",
+    skills: ["React", "TypeScript", "UI/UX Design"],
+    projects: ["AI-based Recommendation System", "E-Learning Platform"],
+    expectedRole: "Assistant Professor",
+    location: "Jammu",
+    longevityScore: 85
+  },
+  { 
+    name: "Ayush Thakur", 
+    email: "ayushthakur1412@gmail.com", 
+    fitmentScore: 69.94,
+    phone: "+91 9876543211",
+    education: "Master of Computer Science",
+    experience: "6+ Years",
+    skills: ["Web Development", "JavaScript", "Node.js"],
+    projects: ["E-Commerce Platform", "Hospital Management System"],
+    expectedRole: "Professor",
+    location: "Delhi",
+    longevityScore: 78
+  },
+  { 
+    name: "Adishwar Sharma", 
+    email: "2021a1045@mietjammu.in", 
+    fitmentScore: 72.58,
+    phone: "+91 9876543212",
+    education: "Ph.D. in AI",
+    experience: "4+ Years",
+    skills: ["Machine Learning", "Data Analysis", "Python"],
+    projects: ["Predictive Analytics Tool", "Natural Language Processing System"],
+    expectedRole: "Research Associate",
+    location: "Bangalore",
+    longevityScore: 92
+  },
+  { 
+    name: "Garima Saigal", 
+    email: "garimasaigal02@gmail.com", 
+    fitmentScore: 55.32,
+    phone: "+91 9876543213",
+    education: "M.Tech in Software Engineering",
+    experience: "2+ Years",
+    skills: ["Java", "Spring Boot", "SQL"],
+    projects: ["Banking Application", "Inventory Management"],
+    expectedRole: "Lab Assistant",
+    location: "Mumbai",
+    longevityScore: 65
+  },
+  { 
+    name: "Aarush Wali", 
+    email: "2022A6002@mietjammu.in", 
+    fitmentScore: 62.45,
+    phone: "+91 9876543214",
+    education: "M.Sc. in AI",
+    experience: "2+ Years",
+    skills: ["Computer Vision", "NLP", "TensorFlow"],
+    projects: ["Facial Recognition System", "Chatbot Implementation"],
+    expectedRole: "AI Researcher",
+    location: "Hyderabad",
+    longevityScore: 80
+  }
 ];
 
 const jobRoles = [
