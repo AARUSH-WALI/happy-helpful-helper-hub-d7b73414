@@ -10,10 +10,25 @@ export interface ResumeData {
   education: Education[];
   experience: Experience[];
   skills: string[];
-  projects?: string[];
-  expectedRole?: string;
-  location?: string;
-  longevityScore?: number;
+  ugInstitute?: string;
+  pgInstitute?: string;
+  phdInstitute: number; // 0 for no, 1 for yes
+  longevityYears: number; // working years count
+  numberOfJobs: number;
+  averageExperience: number; // longevity/number of jobs
+  skillsCount: number;
+  achievementsCount: number;
+  achievements: string[];
+  trainingsCount: number;
+  trainings: string[];
+  workshopsCount: number;
+  workshops: string[];
+  researchPapers?: string[];
+  patents?: string[];
+  books?: string[];
+  isJK: number; // 0 for no, 1 for yes (J&K)
+  projectsCount: number;
+  projects: string[];
 }
 
 export interface Education {

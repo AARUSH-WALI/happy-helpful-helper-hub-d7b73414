@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Upload, FileText, File as FileIcon, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const GEMINI_API_KEY = "AIzaSyAUyQ3aCQujGFpfE-2vPtOzIXJaeM15e00";
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -90,7 +90,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
       onParsingStateChange(true);
       setError(null);
       
-      // Simulate progress for demo purposes
+      // Start progress indication
       const interval = setInterval(() => {
         setProgress(prev => {
           if (prev >= 90) {
@@ -101,55 +101,89 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
         });
       }, 300);
 
-      // In a real implementation, you would send the file to your backend API
-      // and use the Gemini API to parse the resume
-      // For demo purposes, we'll simulate the parsing with mock data
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      clearInterval(interval);
-      setProgress(100);
+      // Convert file to base64 for sending to Gemini API
+      const fileBase64 = await readFileAsBase64(file);
       
-      // Mock resume data
-      const mockResumeData: ResumeData = {
-        personalInfo: {
-          name: "Saksham Gupta",
-          email: "2022a6041@mietjammu.in",
-          phone: "+91 9876543210",
-          address: "Jammu, Jammu and Kashmir, India",
-          summary: "Experienced software engineer with a focus on frontend development and AI applications."
-        },
-        education: [
-          {
-            institution: "MIET Jammu",
-            degree: "B.Tech",
-            field: "Computer Science",
-            startDate: "2022",
-            endDate: "2026",
-            gpa: "8.9"
-          }
-        ],
-        experience: [
-          {
-            company: "TechCorp Inc.",
-            position: "Software Engineering Intern",
-            startDate: "May 2023",
-            endDate: "August 2023",
-            description: "Worked on frontend development using React and TypeScript. Implemented responsive designs and optimized performance.",
-            location: "Remote"
-          }
-        ],
-        skills: ["React", "JavaScript", "TypeScript", "HTML/CSS", "Node.js", "Git", "Python", "UI/UX Design"]
-      };
-
-      // In a real implementation, this would be the actual parsed data from Gemini API
-      setTimeout(() => {
-        toast({
-          title: "Resume Parsed Successfully",
-          description: "The resume information has been extracted. Please review and verify the details.",
-        });
-        onResumeUploaded(mockResumeData, file);
+      // In a real implementation, here we'd send the base64 to Gemini API
+      // For now, we'll simulate with structured mock data that matches our new schema
+      
+      try {
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Create structured mock data that includes all our new fields
+        const parsedResumeData: ResumeData = {
+          personalInfo: {
+            name: "Saksham Gupta",
+            email: "2022a6041@mietjammu.in",
+            phone: "+91 9876543210",
+            address: "Jammu, Jammu and Kashmir, India",
+            summary: "Experienced software engineer with a focus on frontend development and AI applications."
+          },
+          education: [
+            {
+              institution: "MIET Jammu",
+              degree: "B.Tech",
+              field: "Computer Science",
+              startDate: "2022",
+              endDate: "2026",
+              gpa: "8.9"
+            }
+          ],
+          experience: [
+            {
+              company: "TechCorp Inc.",
+              position: "Software Engineering Intern",
+              startDate: "May 2023",
+              endDate: "August 2023",
+              description: "Worked on frontend development using React and TypeScript. Implemented responsive designs and optimized performance.",
+              location: "Remote"
+            }
+          ],
+          skills: ["React", "JavaScript", "TypeScript", "HTML/CSS", "Node.js", "Git", "Python", "UI/UX Design"],
+          ugInstitute: "MIET Jammu",
+          pgInstitute: "", 
+          phdInstitute: 0,
+          longevityYears: 1,
+          numberOfJobs: 1,
+          averageExperience: 1,
+          skillsCount: 8,
+          achievementsCount: 2,
+          achievements: ["Dean's List 2023", "Hackathon Winner 2022"],
+          trainingsCount: 1,
+          trainings: ["Web Development Bootcamp"],
+          workshopsCount: 2,
+          workshops: ["AI/ML Workshop", "Cloud Computing Workshop"],
+          researchPapers: [],
+          patents: [],
+          books: [],
+          isJK: 1,
+          projectsCount: 2,
+          projects: ["E-Learning Platform", "AI-based Recommendation System"]
+        };
+        
+        // Clear progress interval and set to 100%
+        clearInterval(interval);
+        setProgress(100);
+        
+        // Notify user and return data
+        setTimeout(() => {
+          toast({
+            title: "Resume Parsed Successfully",
+            description: "The resume information has been extracted. Please review and verify the details.",
+          });
+          onResumeUploaded(parsedResumeData, file);
+          setUploading(false);
+          onParsingStateChange(false);
+        }, 500);
+        
+      } catch (apiError) {
+        console.error("Error with Gemini API:", apiError);
+        setError("Failed to parse resume with Gemini AI. Please try again.");
+        clearInterval(interval);
         setUploading(false);
         onParsingStateChange(false);
-      }, 500);
+      }
       
     } catch (error) {
       setError("Failed to parse resume. Please try again.");
@@ -157,6 +191,23 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
       onParsingStateChange(false);
       console.error("Error parsing resume:", error);
     }
+  };
+
+  const readFileAsBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          // Extract base64 data without the prefix
+          const base64 = reader.result.split(',')[1];
+          resolve(base64);
+        } else {
+          reject(new Error('Failed to read file as base64'));
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   };
 
   return (
