@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Upload, FileText, File as FileIcon, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  // Note: In production, this key should be stored securely on your backend
   const GEMINI_API_KEY = "AIzaSyAUyQ3aCQujGFpfE-2vPtOzIXJaeM15e00";
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -105,43 +105,48 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
       // Convert file to base64 for sending to Gemini API
       const fileBase64 = await readFileAsBase64(file);
       
-      // Prepare the request to Gemini API
-      const geminiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+      // Use Gemini 1.5 Pro for better document processing (like in your Flask app)
+      const geminiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
+      
+      // Craft a prompt that will work well for resume parsing
       const prompt = `
-        I have a resume in ${file.type.includes("pdf") ? "PDF" : "DOCX"} format. 
-        Parse the following resume and return ONLY a JSON object with these fields:
+        Extract structured information from the following resume and return it in JSON format.
+        Use double quotes for all keys and string values.
+        
+        Extract all of the following fields:
+        
         - personalInfo: object with name, email, phone, address, summary
         - education: array of objects with institution, degree, field, startDate, endDate, gpa
         - experience: array of objects with company, position, startDate, endDate, description, location
-        - skills: array of skills
-        - ugInstitute: string (undergraduate institution name)
-        - pgInstitute: string (postgraduate institution name)
-        - phdInstitute: number (0 for no, 1 for yes)
-        - longevityYears: number (working years count)
-        - numberOfJobs: number
-        - averageExperience: number (longevity/number of jobs)
-        - skillsCount: number
-        - achievementsCount: number
-        - achievements: array of strings
-        - trainingsCount: number
-        - trainings: array of strings
-        - workshopsCount: number
-        - workshops: array of strings
-        - researchPapers: array of strings
-        - patents: array of strings
-        - books: array of strings
-        - isJK: number (0 for no, 1 for yes - for J&K resident)
-        - projectsCount: number
-        - projects: array of strings
+        - skills: array of skills as strings
+        - UG_InstituteName: string (undergraduate institution name)
+        - PG_InstituteName: string (postgraduate institution name)
+        - PhD_Institute: number (0 for no, 1 for yes)
+        - Longevity_Years: number (working years count)
+        - No_of_Jobs: number
+        - Experience_Average: number (Longevity_Years / No_of_Jobs)
+        - Skills_No: number
+        - Achievements_No: number
+        - Achievements: array of strings
+        - Trainings_No: number
+        - Trainings: array of strings
+        - Workshops_No: number
+        - Workshops: array of strings
+        - Research_Papers: array of strings
+        - Patents: array of strings
+        - Books: array of strings
+        - State_JK: number (0 for no, 1 for yes - for J&K resident)
+        - Projects_No: number
+        - Projects: array of strings
+        - Best_Fit_For: string (suggest a Computer Science job role suitable for the candidate)
         
-        Please make sure the format matches exactly, and all fields are included. 
-        Don't add any explanations, just return the JSON.
+        For locations, check if it mentions Jammu, Kashmir, or J&K and set State_JK to 1 if it does.
+        
+        Return only the JSON with no additional explanation or markdown formatting.
       `;
       
       try {
-        // Simulate the actual API call with a delay for demonstration
-        // In a real implementation, uncomment the fetch block below
-        /*
+        // Make the actual API call to Gemini
         const response = await fetch(`${geminiEndpoint}?key=${GEMINI_API_KEY}`, {
           method: 'POST',
           headers: {
@@ -158,7 +163,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
             ],
             generationConfig: {
               temperature: 0.1,
-              maxOutputTokens: 2048,
+              maxOutputTokens: 4096,
               topP: 0.95,
               topK: 40
             }
@@ -171,107 +176,94 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
           throw new Error(data.error.message || "Failed to parse resume");
         }
         
+        // Extract JSON from the response
         const parsedContent = data.candidates[0].content.parts[0].text;
-        const jsonMatch = parsedContent.match(/```json\n([\s\S]*?)\n```/) || 
-                          parsedContent.match(/\{[\s\S]*\}/);
         
-        const cleanedJson = jsonMatch ? jsonMatch[1] || jsonMatch[0] : parsedContent;
-        const parsedResumeData = JSON.parse(cleanedJson);
-        */
-
-        // For demonstration, create sample data that matches our schema
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Try multiple regex patterns to extract the JSON
+        const jsonMatches = [
+          // Match JSON enclosed in code blocks
+          parsedContent.match(/```(?:json)?\s*([\s\S]*?)\s*```/),
+          // Match JSON enclosed in brackets
+          parsedContent.match(/(\{[\s\S]*\})/),
+          // Fallback to the whole response
+          { 1: parsedContent }
+        ];
         
-        // Mock data that matches our schema exactly
-        const parsedResumeData: ResumeData = {
-          personalInfo: {
-            name: "Saksham Gupta",
-            email: "2022a6041@mietjammu.in",
-            phone: "+91 9876543210",
-            address: "Jammu, Jammu and Kashmir, India",
-            summary: "Computer Science student at MIET Jammu with experience in full-stack development and machine learning. Passionate about creating innovative solutions and contributing to open-source projects."
-          },
-          education: [
-            {
-              institution: "MIET Jammu",
-              degree: "B.Tech",
-              field: "Computer Science",
-              startDate: "2022",
-              endDate: "2026",
-              gpa: "8.9"
-            }
-          ],
-          experience: [
-            {
-              company: "TechCorp Inc.",
-              position: "Software Engineering Intern",
-              startDate: "May 2023",
-              endDate: "August 2023",
-              description: "Developed a web application using React, TypeScript, and Node.js. Implemented responsive designs and RESTful APIs. Collaborated with cross-functional teams to deliver features on time.",
-              location: "Remote"
+        // Find the first successful match
+        let jsonText = null;
+        for (const match of jsonMatches) {
+          if (match && match[1]) {
+            jsonText = match[1].trim();
+            break;
+          }
+        }
+        
+        if (!jsonText) {
+          throw new Error("Could not extract JSON from the response");
+        }
+        
+        // Parse the JSON
+        let parsedResumeData;
+        try {
+          parsedResumeData = JSON.parse(jsonText);
+          
+          // Map received data to match your ResumeData interface
+          const mappedData: ResumeData = {
+            personalInfo: parsedResumeData.personalInfo || {
+              name: "",
+              email: "",
+              phone: "",
+              address: "",
+              summary: ""
             },
-            {
-              company: "AI Solutions Ltd.",
-              position: "Machine Learning Intern",
-              startDate: "January 2023",
-              endDate: "April 2023",
-              description: "Worked on image classification models using TensorFlow. Improved model accuracy by 15% through data augmentation and hyperparameter tuning.",
-              location: "Jammu, J&K"
-            }
-          ],
-          skills: ["React", "JavaScript", "TypeScript", "Python", "TensorFlow", "Node.js", "MongoDB", "Git", "AWS", "Docker", "HTML/CSS", "UI/UX Design"],
-          ugInstitute: "MIET Jammu",
-          pgInstitute: "", 
-          phdInstitute: 0,
-          longevityYears: 1.5,
-          numberOfJobs: 2,
-          averageExperience: 0.75,
-          skillsCount: 12,
-          achievementsCount: 3,
-          achievements: [
-            "Dean's List 2023", 
-            "Winner, National Coding Hackathon 2022", 
-            "Best Project Award, College Tech Fest 2022"
-          ],
-          trainingsCount: 2,
-          trainings: [
-            "Full Stack Development Bootcamp, Udemy",
-            "Machine Learning Specialization, Coursera"
-          ],
-          workshopsCount: 2,
-          workshops: [
-            "AI/ML Workshop by Google Developers",
-            "Cloud Computing Workshop by AWS"
-          ],
-          researchPapers: [
-            "Application of Deep Learning in Medical Image Analysis"
-          ],
-          patents: [],
-          books: [],
-          isJK: 1,
-          projectsCount: 3,
-          projects: [
-            "E-Learning Platform with AI Recommendations",
-            "Real-time Chat Application with End-to-End Encryption",
-            "Smart Home Automation System using IoT"
-          ]
-        };
-        
-        // Clear progress interval and set to 100%
-        clearInterval(interval);
-        setProgress(100);
-        
-        // Notify user and return data
-        setTimeout(() => {
-          toast({
-            title: "Resume Parsed Successfully",
-            description: "The resume information has been extracted. Please review and verify the details.",
-          });
-          onResumeUploaded(parsedResumeData, file);
-          setUploading(false);
-          onParsingStateChange(false);
-        }, 500);
-        
+            education: parsedResumeData.education || [],
+            experience: parsedResumeData.experience || [],
+            skills: parsedResumeData.skills || [],
+            ugInstitute: parsedResumeData.UG_InstituteName || "",
+            pgInstitute: parsedResumeData.PG_InstituteName || "",
+            phdInstitute: parsedResumeData.PhD_Institute || 0,
+            longevityYears: parsedResumeData.Longevity_Years || 0,
+            numberOfJobs: parsedResumeData.No_of_Jobs || 0,
+            averageExperience: parsedResumeData.Experience_Average || 0,
+            skillsCount: parsedResumeData.Skills_No || 0,
+            achievementsCount: parsedResumeData.Achievements_No || 0,
+            achievements: parsedResumeData.Achievements || [],
+            trainingsCount: parsedResumeData.Trainings_No || 0, 
+            trainings: parsedResumeData.Trainings || [],
+            workshopsCount: parsedResumeData.Workshops_No || 0,
+            workshops: parsedResumeData.Workshops || [],
+            researchPapers: parsedResumeData.Research_Papers || [],
+            patents: parsedResumeData.Patents || [],
+            books: parsedResumeData.Books || [],
+            isJK: parsedResumeData.State_JK || 0,
+            projectsCount: parsedResumeData.Projects_No || 0,
+            projects: parsedResumeData.Projects || [],
+            bestFitFor: parsedResumeData.Best_Fit_For || ""
+          };
+          
+          // Debug log
+          console.log("Successfully parsed resume data:", mappedData);
+          
+          // Clear progress interval and set to 100%
+          clearInterval(interval);
+          setProgress(100);
+          
+          // Notify user and return data
+          setTimeout(() => {
+            toast({
+              title: "Resume Parsed Successfully",
+              description: "The resume information has been extracted. Please review and verify the details.",
+            });
+            onResumeUploaded(mappedData, file);
+            setUploading(false);
+            onParsingStateChange(false);
+          }, 500);
+          
+        } catch (jsonError) {
+          console.error("Error parsing JSON:", jsonError);
+          console.error("Raw JSON text:", jsonText);
+          throw new Error("Invalid JSON response from API");
+        }
       } catch (apiError) {
         console.error("Error with Gemini API:", apiError);
         setError("Failed to parse resume with Gemini AI. Please try again.");
