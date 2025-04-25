@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
@@ -8,6 +9,14 @@ interface Candidate {
   name: string;
   email: string;
   fitmentScore: number;
+  phone?: string;
+  education?: string;
+  experience?: string;
+  skills?: string[];
+  projects?: string[];
+  expectedRole?: string;
+  location?: string;
+  longevityScore?: number;
 }
 
 interface CandidateScoresProps {

@@ -10,6 +10,10 @@ export interface ResumeData {
   education: Education[];
   experience: Experience[];
   skills: string[];
+  projects?: string[];
+  expectedRole?: string;
+  location?: string;
+  longevityScore?: number;
 }
 
 export interface Education {
