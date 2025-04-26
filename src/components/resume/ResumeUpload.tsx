@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ResumeData } from "@/types/resume";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ResumeUploadProps {
   onResumeUploaded: (data: ResumeData, file: File) => void;
@@ -248,6 +249,9 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
           clearInterval(interval);
           setProgress(100);
           
+          // Inside parseResume, just before setting the toast and before onResumeUploaded
+          await sendPersonalityTestInvite(mappedData);
+
           // Notify user and return data
           setTimeout(() => {
             toast({
@@ -295,6 +299,29 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
+  };
+
+  const sendPersonalityTestInvite = async (parsedResumeData: ResumeData) => {
+    try {
+      const { data, error } = await supabase
+        .from('candidate_resume')
+        .select('id')
+        .eq('best_fit_for', parsedResumeData.bestFitFor)
+        .single();
+
+      if (error) throw error;
+
+      await supabase.functions.invoke('send-personality-test-invite', {
+        body: JSON.stringify({
+          resumeId: data.id,
+          email: parsedResumeData.personalInfo.email,
+          name: parsedResumeData.personalInfo.name,
+          personalityTestUrl: 'https://your-personality-test-url.com' // Replace with your actual URL
+        })
+      });
+    } catch (error) {
+      console.error('Failed to send personality test invite:', error);
+    }
   };
 
   return (
