@@ -1,4 +1,3 @@
-
 export interface ResumeData {
   personalInfo: {
     name: string;
@@ -29,6 +28,7 @@ export interface ResumeData {
   isJK: number; // 0 for no, 1 for yes (J&K)
   projectsCount: number;
   projects: string[];
+  bestFitFor?: string; // Making this optional and adding it to the interface
 }
 
 export interface Education {

@@ -9,6 +9,75 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      candidate_resume: {
+        Row: {
+          achievements: string | null
+          achievements_no: number | null
+          best_fit_for: string | null
+          books: number | null
+          created_at: string | null
+          experience_average: number | null
+          id: string
+          longevity_years: number | null
+          number_of_jobs: number | null
+          pg_institute_name: string | null
+          projects: string | null
+          projects_no: number | null
+          skills: string | null
+          skills_no: number | null
+          state_jk: boolean | null
+          total_papers: number | null
+          total_patents: number | null
+          trainings: number | null
+          ug_institute_name: string | null
+          workshops: number | null
+        }
+        Insert: {
+          achievements?: string | null
+          achievements_no?: number | null
+          best_fit_for?: string | null
+          books?: number | null
+          created_at?: string | null
+          experience_average?: number | null
+          id?: string
+          longevity_years?: number | null
+          number_of_jobs?: number | null
+          pg_institute_name?: string | null
+          projects?: string | null
+          projects_no?: number | null
+          skills?: string | null
+          skills_no?: number | null
+          state_jk?: boolean | null
+          total_papers?: number | null
+          total_patents?: number | null
+          trainings?: number | null
+          ug_institute_name?: string | null
+          workshops?: number | null
+        }
+        Update: {
+          achievements?: string | null
+          achievements_no?: number | null
+          best_fit_for?: string | null
+          books?: number | null
+          created_at?: string | null
+          experience_average?: number | null
+          id?: string
+          longevity_years?: number | null
+          number_of_jobs?: number | null
+          pg_institute_name?: string | null
+          projects?: string | null
+          projects_no?: number | null
+          skills?: string | null
+          skills_no?: number | null
+          state_jk?: boolean | null
+          total_papers?: number | null
+          total_patents?: number | null
+          trainings?: number | null
+          ug_institute_name?: string | null
+          workshops?: number | null
+        }
+        Relationships: []
+      }
       "fitment score": {
         Row: {
           agreeable: number | null
@@ -39,6 +108,51 @@ export type Database = {
           Name?: string
           neuroticism?: number | null
           openness?: number | null
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          title?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          score: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          name: string
+          score?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          score?: number | null
         }
         Relationships: []
       }
