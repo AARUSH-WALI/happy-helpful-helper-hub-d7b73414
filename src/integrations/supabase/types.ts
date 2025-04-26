@@ -9,353 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      auth: {
+      "fitment score": {
         Row: {
-          change_role: string | null
-          created_at: string
-          email: string | null
-          fname: string | null
-          id: string
-          lname: string | null
-          number: string | null
-          password: string | null
-          profile_pic: string | null
-          role: string | null
-          user_device: string | null
-          user_ip: string | null
+          agreeable: number | null
+          conciousness: number | null
+          extro: number | null
+          FitmentScore: number | null
+          id: number
+          Name: string
+          neuroticism: number | null
+          openness: number | null
         }
         Insert: {
-          change_role?: string | null
-          created_at?: string
-          email?: string | null
-          fname?: string | null
-          id?: string
-          lname?: string | null
-          number?: string | null
-          password?: string | null
-          profile_pic?: string | null
-          role?: string | null
-          user_device?: string | null
-          user_ip?: string | null
+          agreeable?: number | null
+          conciousness?: number | null
+          extro?: number | null
+          FitmentScore?: number | null
+          id?: number
+          Name: string
+          neuroticism?: number | null
+          openness?: number | null
         }
         Update: {
-          change_role?: string | null
-          created_at?: string
-          email?: string | null
-          fname?: string | null
-          id?: string
-          lname?: string | null
-          number?: string | null
-          password?: string | null
-          profile_pic?: string | null
-          role?: string | null
-          user_device?: string | null
-          user_ip?: string | null
+          agreeable?: number | null
+          conciousness?: number | null
+          extro?: number | null
+          FitmentScore?: number | null
+          id?: number
+          Name?: string
+          neuroticism?: number | null
+          openness?: number | null
         }
         Relationships: []
-      }
-      category: {
-        Row: {
-          created_at: string
-          id: string
-          is_active: boolean | null
-          job_desc: string | null
-          job_name: string | null
-          job_req: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_active?: boolean | null
-          job_desc?: string | null
-          job_name?: string | null
-          job_req?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_active?: boolean | null
-          job_desc?: string | null
-          job_name?: string | null
-          job_req?: string | null
-        }
-        Relationships: []
-      }
-      personality: {
-        Row: {
-          A: number | null
-          auth_id: string | null
-          C: number | null
-          created_at: string
-          E: number | null
-          id: string
-          N: number | null
-          O: number | null
-        }
-        Insert: {
-          A?: number | null
-          auth_id?: string | null
-          C?: number | null
-          created_at?: string
-          E?: number | null
-          id?: string
-          N?: number | null
-          O?: number | null
-        }
-        Update: {
-          A?: number | null
-          auth_id?: string | null
-          C?: number | null
-          created_at?: string
-          E?: number | null
-          id?: string
-          N?: number | null
-          O?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "personality_auth_id_fkey"
-            columns: ["auth_id"]
-            isOneToOne: false
-            referencedRelation: "auth"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      previousEmployees: {
-        Row: {
-          Achievements: number | null
-          Books: number | null
-          created_at: string
-          Employee_Code: number | null
-          Fitment_Score: number | null
-          id: string
-          IS_Assistant_Professor: boolean | null
-          IS_Professor: boolean | null
-          Longevity: number | null
-          Number_of_Jobs: number | null
-          Number_of_Unique_Designations: number | null
-          PG_Institute: number | null
-          PHD_Institute: number | null
-          Sector_Defense: number | null
-          Sector_Education: number | null
-          Sector_Government: number | null
-          Sector_Industry: number | null
-          State_J_and_K: boolean | null
-          Total_Experience: number | null
-          TotalPapers: number | null
-          TotalPatents: number | null
-          Trainings: number | null
-          UG_Institute: number | null
-          Workshops: number | null
-        }
-        Insert: {
-          Achievements?: number | null
-          Books?: number | null
-          created_at?: string
-          Employee_Code?: number | null
-          Fitment_Score?: number | null
-          id?: string
-          IS_Assistant_Professor?: boolean | null
-          IS_Professor?: boolean | null
-          Longevity?: number | null
-          Number_of_Jobs?: number | null
-          Number_of_Unique_Designations?: number | null
-          PG_Institute?: number | null
-          PHD_Institute?: number | null
-          Sector_Defense?: number | null
-          Sector_Education?: number | null
-          Sector_Government?: number | null
-          Sector_Industry?: number | null
-          State_J_and_K?: boolean | null
-          Total_Experience?: number | null
-          TotalPapers?: number | null
-          TotalPatents?: number | null
-          Trainings?: number | null
-          UG_Institute?: number | null
-          Workshops?: number | null
-        }
-        Update: {
-          Achievements?: number | null
-          Books?: number | null
-          created_at?: string
-          Employee_Code?: number | null
-          Fitment_Score?: number | null
-          id?: string
-          IS_Assistant_Professor?: boolean | null
-          IS_Professor?: boolean | null
-          Longevity?: number | null
-          Number_of_Jobs?: number | null
-          Number_of_Unique_Designations?: number | null
-          PG_Institute?: number | null
-          PHD_Institute?: number | null
-          Sector_Defense?: number | null
-          Sector_Education?: number | null
-          Sector_Government?: number | null
-          Sector_Industry?: number | null
-          State_J_and_K?: boolean | null
-          Total_Experience?: number | null
-          TotalPapers?: number | null
-          TotalPatents?: number | null
-          Trainings?: number | null
-          UG_Institute?: number | null
-          Workshops?: number | null
-        }
-        Relationships: []
-      }
-      profile: {
-        Row: {
-          achievements: string | null
-          auth_id: string | null
-          bio: string | null
-          books: string | null
-          created_at: string | null
-          exp_new: string | null
-          from_jk: string | null
-          highest_education: string | null
-          id: string
-          is_as_professor: string | null
-          is_pg: string | null
-          is_phd: string | null
-          is_professor: string | null
-          is_ug: string | null
-          job_role: string | null
-          longevity: string | null
-          pg_institute: string | null
-          phd_institute: string | null
-          score: string | null
-          skills: string | null
-          total_papers: string | null
-          total_patents: string | null
-          trainings: string | null
-          ug_institute: string | null
-          workshops: string | null
-        }
-        Insert: {
-          achievements?: string | null
-          auth_id?: string | null
-          bio?: string | null
-          books?: string | null
-          created_at?: string | null
-          exp_new?: string | null
-          from_jk?: string | null
-          highest_education?: string | null
-          id?: string
-          is_as_professor?: string | null
-          is_pg?: string | null
-          is_phd?: string | null
-          is_professor?: string | null
-          is_ug?: string | null
-          job_role?: string | null
-          longevity?: string | null
-          pg_institute?: string | null
-          phd_institute?: string | null
-          score?: string | null
-          skills?: string | null
-          total_papers?: string | null
-          total_patents?: string | null
-          trainings?: string | null
-          ug_institute?: string | null
-          workshops?: string | null
-        }
-        Update: {
-          achievements?: string | null
-          auth_id?: string | null
-          bio?: string | null
-          books?: string | null
-          created_at?: string | null
-          exp_new?: string | null
-          from_jk?: string | null
-          highest_education?: string | null
-          id?: string
-          is_as_professor?: string | null
-          is_pg?: string | null
-          is_phd?: string | null
-          is_professor?: string | null
-          is_ug?: string | null
-          job_role?: string | null
-          longevity?: string | null
-          pg_institute?: string | null
-          phd_institute?: string | null
-          score?: string | null
-          skills?: string | null
-          total_papers?: string | null
-          total_patents?: string | null
-          trainings?: string | null
-          ug_institute?: string | null
-          workshops?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profile_auth_id_fkey"
-            columns: ["auth_id"]
-            isOneToOne: false
-            referencedRelation: "auth"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      profilescores: {
-        Row: {
-          achievements: number | null
-          auth_id: string | null
-          books: number | null
-          created_at: string
-          id: string
-          is_assistant_professor: number | null
-          is_professor: number | null
-          pg_institute: number | null
-          phd_institute: number | null
-          total_score: number | null
-          totalpapers: number | null
-          totalpatents: number | null
-          trainings: number | null
-          ug_institute: number | null
-          wrokshops: number | null
-        }
-        Insert: {
-          achievements?: number | null
-          auth_id?: string | null
-          books?: number | null
-          created_at?: string
-          id?: string
-          is_assistant_professor?: number | null
-          is_professor?: number | null
-          pg_institute?: number | null
-          phd_institute?: number | null
-          total_score?: number | null
-          totalpapers?: number | null
-          totalpatents?: number | null
-          trainings?: number | null
-          ug_institute?: number | null
-          wrokshops?: number | null
-        }
-        Update: {
-          achievements?: number | null
-          auth_id?: string | null
-          books?: number | null
-          created_at?: string
-          id?: string
-          is_assistant_professor?: number | null
-          is_professor?: number | null
-          pg_institute?: number | null
-          phd_institute?: number | null
-          total_score?: number | null
-          totalpapers?: number | null
-          totalpatents?: number | null
-          trainings?: number | null
-          ug_institute?: number | null
-          wrokshops?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profilescores_auth_id_fkey"
-            columns: ["auth_id"]
-            isOneToOne: false
-            referencedRelation: "auth"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Views: {
@@ -365,8 +50,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      task_priority: "low" | "medium" | "high"
-      task_status: "backlog" | "in-progress" | "paused" | "ready-for-launch"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -481,9 +165,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      task_priority: ["low", "medium", "high"],
-      task_status: ["backlog", "in-progress", "paused", "ready-for-launch"],
-    },
+    Enums: {},
   },
 } as const
