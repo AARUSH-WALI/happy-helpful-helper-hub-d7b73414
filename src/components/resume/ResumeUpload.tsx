@@ -316,7 +316,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
           resumeId: data.id,
           email: parsedResumeData.personalInfo.email,
           name: parsedResumeData.personalInfo.name,
-          personalityTestUrl: 'https://your-personality-test-url.com' // Replace with your actual URL
+          personalityTestUrl: 'http://localhost:5173/' // Replace with your actual URL
         })
       });
     } catch (error) {
