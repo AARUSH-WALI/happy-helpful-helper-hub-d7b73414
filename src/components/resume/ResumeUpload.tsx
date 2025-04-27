@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Upload, FileText, File as FileIcon, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -132,7 +133,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
         - Trainings_No: number
         - Trainings: array of strings
         - Workshops_No: number
-        - Workshops_No: array of strings
+        - Workshops: array of strings
         - Research_Papers: array of strings
         - Patents: array of strings
         - Books: array of strings
@@ -207,6 +208,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
         let parsedResumeData;
         try {
           parsedResumeData = JSON.parse(jsonText);
+          console.log("Parsed resume data:", parsedResumeData);
         
           // Map received data to match ResumeData interface
           const mappedData: ResumeData = {
@@ -273,19 +275,30 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
             .select()
             .single();
 
-          if (insertError) throw insertError;
+          if (insertError) {
+            console.error("Error inserting data:", insertError);
+            throw insertError;
+          }
 
-          // Send personality test invitation email
-          const { error: inviteError } = await supabase.functions.invoke('send-personality-test-invite', {
-            body: {
-              resumeId: resumeData.id,
-              email: mappedData.personalInfo.email,
-              name: mappedData.personalInfo.name,
-              personalityTestUrl: 'http://localhost:5173/' // Replace with your actual URL
+          // Try to send personality test invitation email
+          try {
+            const { error: inviteError } = await supabase.functions.invoke('send-personality-test-invite', {
+              body: {
+                resumeId: resumeData.id,
+                email: mappedData.personalInfo.email,
+                name: mappedData.personalInfo.name,
+                personalityTestUrl: 'http://localhost:5173/' // Replace with your actual URL
+              }
+            });
+
+            if (inviteError) {
+              console.error("Error sending invitation:", inviteError);
+              // Don't throw here, we want to continue even if email fails
             }
-          });
-
-          if (inviteError) throw inviteError;
+          } catch (emailError) {
+            console.error("Failed to send email:", emailError);
+            // Continue processing even if email sending fails
+          }
 
           // Clear progress interval and set to 100%
           clearInterval(interval);
@@ -295,7 +308,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
           setTimeout(() => {
             toast({
               title: "Resume Processed Successfully",
-              description: "The resume has been parsed and the candidate has been notified.",
+              description: "The resume has been parsed and stored successfully.",
             });
             onResumeUploaded(mappedData, file);
             setUploading(false);
