@@ -243,7 +243,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
             bestFitFor: parsedResumeData.Best_Fit_For || ""
           };
 
-          // Store resume data in Supabase
+          // Store resume data in Supabase - FIX: Correct the insert syntax
           const { data: resumeData, error: insertError } = await supabase
             .from('candidate_resume')
             .insert({
@@ -266,7 +266,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
               workshops: mappedData.workshopsCount,
               ug_institute_name: mappedData.ugInstitute,
               pg_institute_name: mappedData.pgInstitute,
-              state_jk: mappedData.isJK,
+              state_jk: mappedData.isJK === 1,
               total_papers: mappedData.researchPapers?.length || 0,
               total_patents: mappedData.patents?.length || 0,
               books: mappedData.books?.length || 0
