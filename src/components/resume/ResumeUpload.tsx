@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Upload, FileText, File as FileIcon, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -243,13 +242,13 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
             bestFitFor: parsedResumeData.Best_Fit_For || ""
           };
 
-          // Store resume data in Supabase - FIX: Correct the insert syntax
+          // Store resume data in Supabase
           const { data: resumeData, error: insertError } = await supabase
             .from('candidate_resume')
-            .insert({
-              education: mappedData.education,
-              experience: mappedData.experience,
-              personal_info: mappedData.personalInfo,
+            .insert([{
+              education: JSON.stringify(mappedData.education),
+              experience: JSON.stringify(mappedData.experience),
+              personal_info: JSON.stringify(mappedData.personalInfo),
               email: mappedData.personalInfo.email,
               phd_institute: mappedData.phdInstitute,
               best_fit_for: mappedData.bestFitFor,
@@ -270,7 +269,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
               total_papers: mappedData.researchPapers?.length || 0,
               total_patents: mappedData.patents?.length || 0,
               books: mappedData.books?.length || 0
-            })
+            }])
             .select()
             .single();
 
