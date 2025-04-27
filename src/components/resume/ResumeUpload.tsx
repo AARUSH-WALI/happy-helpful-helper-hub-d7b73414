@@ -132,7 +132,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
         - Trainings_No: number
         - Trainings: array of strings
         - Workshops_No: number
-        - Workshops: array of strings
+        - Workshops_No: array of strings
         - Research_Papers: array of strings
         - Patents: array of strings
         - Books: array of strings
@@ -207,77 +207,108 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
         let parsedResumeData;
         try {
           parsedResumeData = JSON.parse(jsonText);
-          
-          // Map received data to match your ResumeData interface
-          const mappedData: ResumeData = {
-            personalInfo: parsedResumeData.personalInfo || {
-              name: "",
-              email: "",
-              phone: "",
-              address: "",
-              summary: ""
-            },
-            education: parsedResumeData.education || [],
-            experience: parsedResumeData.experience || [],
-            skills: parsedResumeData.skills || [],
-            ugInstitute: parsedResumeData.UG_InstituteName || "",
-            pgInstitute: parsedResumeData.PG_InstituteName || "",
-            phdInstitute: parsedResumeData.PhD_Institute || 0,
-            longevityYears: parsedResumeData.Longevity_Years || 0,
-            numberOfJobs: parsedResumeData.No_of_Jobs || 0,
-            averageExperience: parsedResumeData.Experience_Average || 0,
-            skillsCount: parsedResumeData.Skills_No || 0,
-            achievementsCount: parsedResumeData.Achievements_No || 0,
-            achievements: parsedResumeData.Achievements || [],
-            trainingsCount: parsedResumeData.Trainings_No || 0, 
-            trainings: parsedResumeData.Trainings || [],
-            workshopsCount: parsedResumeData.Workshops_No || 0,
-            workshops: parsedResumeData.Workshops || [],
-            researchPapers: parsedResumeData.Research_Papers || [],
-            patents: parsedResumeData.Patents || [],
-            books: parsedResumeData.Books || [],
-            isJK: parsedResumeData.State_JK || 0,
-            projectsCount: parsedResumeData.Projects_No || 0,
-            projects: parsedResumeData.Projects || [],
-            bestFitFor: parsedResumeData.Best_Fit_For || ""
-          };
-          
-          // Debug log
-          console.log("Successfully parsed resume data:", mappedData);
-          
-          // Clear progress interval and set to 100%
-          clearInterval(interval);
-          setProgress(100);
-          
-          // Inside parseResume, just before setting the toast and before onResumeUploaded
-          await sendPersonalityTestInvite(mappedData);
+        
+        // Map received data to match ResumeData interface
+        const mappedData: ResumeData = {
+          personalInfo: parsedResumeData.personalInfo || {
+            name: "",
+            email: "",
+            phone: "",
+            address: "",
+            summary: ""
+          },
+          education: parsedResumeData.education || [],
+          experience: parsedResumeData.experience || [],
+          skills: parsedResumeData.skills || [],
+          ugInstitute: parsedResumeData.UG_InstituteName || "",
+          pgInstitute: parsedResumeData.PG_InstituteName || "",
+          phdInstitute: parsedResumeData.PhD_Institute || 0,
+          longevityYears: parsedResumeData.Longevity_Years || 0,
+          numberOfJobs: parsedResumeData.No_of_Jobs || 0,
+          averageExperience: parsedResumeData.Experience_Average || 0,
+          skillsCount: parsedResumeData.Skills_No || 0,
+          achievementsCount: parsedResumeData.Achievements_No || 0,
+          achievements: parsedResumeData.Achievements || [],
+          trainingsCount: parsedResumeData.Trainings_No || 0,
+          trainings: parsedResumeData.Trainings || [],
+          workshopsCount: parsedResumeData.Workshops_No || 0,
+          workshops: parsedResumeData.Workshops || [],
+          researchPapers: parsedResumeData.Research_Papers || [],
+          patents: parsedResumeData.Patents || [],
+          books: parsedResumeData.Books || [],
+          isJK: parsedResumeData.State_JK || 0,
+          projectsCount: parsedResumeData.Projects_No || 0,
+          projects: parsedResumeData.Projects || [],
+          bestFitFor: parsedResumeData.Best_Fit_For || ""
+        };
 
-          // Notify user and return data
-          setTimeout(() => {
-            toast({
-              title: "Resume Parsed Successfully",
-              description: "The resume information has been extracted. Please review and verify the details.",
-            });
-            onResumeUploaded(mappedData, file);
-            setUploading(false);
-            onParsingStateChange(false);
-          }, 500);
-          
-        } catch (jsonError) {
-          console.error("Error parsing JSON:", jsonError);
-          console.error("Raw JSON text:", jsonText);
-          throw new Error("Invalid JSON response from API");
-        }
-      } catch (apiError) {
-        console.error("Error with Gemini API:", apiError);
-        setError("Failed to parse resume with Gemini AI. Please try again.");
+        // Store resume data in Supabase
+        const { data: resumeData, error: insertError } = await supabase
+          .from('candidate_resume')
+          .insert({
+            education: mappedData.education,
+            experience: mappedData.experience,
+            personal_info: mappedData.personalInfo,
+            email: mappedData.personalInfo.email,
+            phd_institute: mappedData.phdInstitute,
+            best_fit_for: mappedData.bestFitFor,
+            skills: mappedData.skills.join(', '),
+            skills_no: mappedData.skillsCount,
+            achievements: mappedData.achievements.join(', '),
+            achievements_no: mappedData.achievementsCount,
+            projects: mappedData.projects.join(', '),
+            projects_no: mappedData.projectsCount,
+            longevity_years: mappedData.longevityYears,
+            number_of_jobs: mappedData.numberOfJobs,
+            experience_average: mappedData.averageExperience,
+            trainings: mappedData.trainingsCount,
+            workshops: mappedData.workshopsCount,
+            ug_institute_name: mappedData.ugInstitute,
+            pg_institute_name: mappedData.pgInstitute,
+            state_jk: mappedData.isJK,
+            total_papers: mappedData.researchPapers?.length || 0,
+            total_patents: mappedData.patents?.length || 0,
+            books: mappedData.books?.length || 0
+          })
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+
+        // Send personality test invitation email
+        const { error: inviteError } = await supabase.functions.invoke('send-personality-test-invite', {
+          body: {
+            resumeId: resumeData.id,
+            email: mappedData.personalInfo.email,
+            name: mappedData.personalInfo.name,
+            personalityTestUrl: 'http://localhost:5173/' // Replace with your actual URL
+          }
+        });
+
+        if (inviteError) throw inviteError;
+
+        // Clear progress interval and set to 100%
         clearInterval(interval);
-        setUploading(false);
-        onParsingStateChange(false);
+        setProgress(100);
+        
+        // Notify user and return data
+        setTimeout(() => {
+          toast({
+            title: "Resume Processed Successfully",
+            description: "The resume has been parsed and the candidate has been notified.",
+          });
+          onResumeUploaded(mappedData, file);
+          setUploading(false);
+          onParsingStateChange(false);
+        }, 500);
+        
+      } catch (jsonError) {
+        console.error("Error parsing JSON:", jsonError);
+        console.error("Raw JSON text:", jsonText);
+        throw new Error("Invalid JSON response from API");
       }
-      
     } catch (error) {
-      setError("Failed to parse resume. Please try again.");
+      setError("Failed to process resume. Please try again.");
       setUploading(false);
       onParsingStateChange(false);
       console.error("Error parsing resume:", error);

@@ -16,11 +16,16 @@ export type Database = {
           best_fit_for: string | null
           books: number | null
           created_at: string | null
+          education: Json | null
+          email: string | null
+          experience: Json | null
           experience_average: number | null
           id: string
           longevity_years: number | null
           number_of_jobs: number | null
+          personal_info: Json | null
           pg_institute_name: string | null
+          phd_institute: number | null
           projects: string | null
           projects_no: number | null
           skills: string | null
@@ -38,11 +43,16 @@ export type Database = {
           best_fit_for?: string | null
           books?: number | null
           created_at?: string | null
+          education?: Json | null
+          email?: string | null
+          experience?: Json | null
           experience_average?: number | null
           id?: string
           longevity_years?: number | null
           number_of_jobs?: number | null
+          personal_info?: Json | null
           pg_institute_name?: string | null
+          phd_institute?: number | null
           projects?: string | null
           projects_no?: number | null
           skills?: string | null
@@ -60,11 +70,16 @@ export type Database = {
           best_fit_for?: string | null
           books?: number | null
           created_at?: string | null
+          education?: Json | null
+          email?: string | null
+          experience?: Json | null
           experience_average?: number | null
           id?: string
           longevity_years?: number | null
           number_of_jobs?: number | null
+          personal_info?: Json | null
           pg_institute_name?: string | null
+          phd_institute?: number | null
           projects?: string | null
           projects_no?: number | null
           skills?: string | null
@@ -129,6 +144,30 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           title?: string
+        }
+        Relationships: []
+      }
+      personality_test_invitations: {
+        Row: {
+          candidate_email: string
+          created_at: string | null
+          id: string
+          is_completed: boolean | null
+          token: string
+        }
+        Insert: {
+          candidate_email: string
+          created_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          token: string
+        }
+        Update: {
+          candidate_email?: string
+          created_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          token?: string
         }
         Relationships: []
       }
