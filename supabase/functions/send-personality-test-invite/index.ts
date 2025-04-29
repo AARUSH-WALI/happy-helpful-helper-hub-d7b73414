@@ -36,15 +36,14 @@ Deno.serve(async (req) => {
     // Generate unique token
     const token = generateToken();
 
-    // Store invitation in database
+    // Store invitation in database using the correct schema
+    // Note: We're storing the email directly as per your schema, not a foreign key
     const { data, error: insertError } = await supabase
       .from('personality_test_invitations')
       .insert({
-        candidate_resume_id: resumeId,
-        email,
-        name,
+        candidate_email: email,  // Use the actual column name from your schema
         token,
-        status: 'pending'
+        is_completed: false
       })
       .select()
       .single();

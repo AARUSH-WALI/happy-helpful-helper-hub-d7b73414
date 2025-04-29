@@ -247,11 +247,9 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
           // Store resume data in Supabase
           const { data: resumeData, error: insertError } = await supabase
             .from('candidate_resume')
-            .insert([{
-              education: JSON.stringify(mappedData.education),
-              experience: JSON.stringify(mappedData.experience),
-              personal_info: JSON.stringify(mappedData.personalInfo),
-              email: mappedData.personalInfo.email,
+            .insert({
+              ug_institute_name: mappedData.ugInstitute,
+              pg_institute_name: mappedData.pgInstitute,
               phd_institute: mappedData.phdInstitute,
               best_fit_for: mappedData.bestFitFor,
               skills: mappedData.skills.join(', '),
@@ -265,13 +263,15 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
               experience_average: mappedData.averageExperience,
               trainings: mappedData.trainingsCount,
               workshops: mappedData.workshopsCount,
-              ug_institute_name: mappedData.ugInstitute,
-              pg_institute_name: mappedData.pgInstitute,
               state_jk: mappedData.isJK === 1,
               total_papers: mappedData.researchPapers?.length || 0,
               total_patents: mappedData.patents?.length || 0,
-              books: mappedData.books?.length || 0
-            }])
+              books: mappedData.books?.length || 0,
+              email: mappedData.personalInfo.email,
+              education: JSON.stringify(mappedData.education),
+              experience: JSON.stringify(mappedData.experience),
+              personal_info: JSON.stringify(mappedData.personalInfo)
+            })
             .select()
             .single();
 
