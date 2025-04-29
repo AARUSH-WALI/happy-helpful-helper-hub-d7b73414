@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
       resumeId, 
       email, 
       name, 
-      personalityTestUrl = 'https://placeholder-personality-test.com',
+      personalityTestUrl = 'http://localhost:5173/personality-test',
       testResults
     } = await req.json();
 
@@ -131,11 +131,10 @@ Deno.serve(async (req) => {
     const token = generateToken();
 
     // Store invitation in database using the correct schema
-    // Note: We're storing the email directly as per your schema, not a foreign key
     const { data, error: insertError } = await supabase
       .from('personality_test_invitations')
       .insert({
-        candidate_email: email,  // Use the actual column name from your schema
+        candidate_email: email,
         token,
         is_completed: false
       })
@@ -144,25 +143,30 @@ Deno.serve(async (req) => {
 
     if (insertError) throw insertError;
 
-    // Construct invitation link
+    // Construct invitation link - use absolute URL with token
     const invitationLink = `${personalityTestUrl}?token=${token}`;
 
-    // Send email
+    // Send email using Resend's default domain (onboarding@resend.dev)
     const { error: emailError } = await resend.emails.send({
-      from: 'Candidate Assessment <assessments@yourcompany.com>',
+      from: 'Candidate Assessment <onboarding@resend.dev>',
       to: email,
       subject: 'Complete Your Personality Assessment',
       html: `
         <h1>Hello ${name},</h1>
-        <p>We invite you to complete a brief personality assessment as part of your job application process.</p>
+        <p>We invite you to complete a brief personality assessment (Big Five) as part of your job application process.</p>
         <p>Please click the link below to start the test:</p>
-        <a href="${invitationLink}">Take the Personality Test</a>
-        <p>This link is unique to you and will expire soon.</p>
-        <p>Best regards,<br>Your Hiring Team</p>
+        <a href="${invitationLink}" style="display: inline-block; background-color: #4A90E2; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Take the Personality Test</a>
+        <p>This link is unique to you and will expire in 48 hours.</p>
+        <p>Best regards,<br>The Hiring Team</p>
       `
     });
 
-    if (emailError) throw emailError;
+    if (emailError) {
+      console.error("Email sending error:", emailError);
+      throw emailError;
+    }
+
+    console.log("Email sent successfully to:", email);
 
     return new Response(JSON.stringify({ 
       message: 'Invitation sent successfully', 

@@ -20,8 +20,14 @@ export type TestResults = {
   personalityScores: PersonalityScores;
 };
 
+export type InviteParams = {
+  email: string;
+  name: string;
+};
+
 export function usePersonalityTest() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
 
   const submitTestResults = async (results: TestResults) => {
@@ -71,8 +77,55 @@ export function usePersonalityTest() {
     }
   };
 
+  const sendTestInvite = async ({ email, name }: InviteParams) => {
+    try {
+      setIsSending(true);
+      
+      // Determine the appropriate test URL based on current environment
+      const baseUrl = window.location.origin; 
+      const personalityTestUrl = `${baseUrl}/personality-test`;
+      
+      // Send invitation via edge function
+      const { data, error } = await supabase.functions.invoke('send-personality-test-invite', {
+        body: {
+          email,
+          name,
+          personalityTestUrl
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Show success message
+      toast({
+        title: "Invitation sent",
+        description: `A personality test invitation has been sent to ${email}.`,
+      });
+      
+      sonnerToast.success("Invitation sent successfully");
+      return true;
+    } catch (error) {
+      console.error('Error sending test invitation:', error);
+      
+      toast({
+        title: "Failed to send invitation",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+      
+      sonnerToast.error("Failed to send invitation");
+      return false;
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   return {
     isSubmitting,
-    submitTestResults
+    isSending,
+    submitTestResults,
+    sendTestInvite
   };
 }
