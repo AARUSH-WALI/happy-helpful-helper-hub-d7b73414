@@ -30,10 +30,104 @@ Deno.serve(async (req) => {
       resumeId, 
       email, 
       name, 
-      personalityTestUrl = 'https://placeholder-personality-test.com' 
+      personalityTestUrl = 'https://placeholder-personality-test.com',
+      testResults
     } = await req.json();
 
-    // Generate unique token
+    // If we have test results, store them and update invitation status
+    if (testResults) {
+      console.log("Received test results:", testResults);
+      
+      // Update invitation status
+      const { error: updateError } = await supabase
+        .from('personality_test_invitations')
+        .update({ is_completed: true })
+        .eq('token', testResults.token);
+      
+      if (updateError) {
+        console.error("Error updating invitation status:", updateError);
+        throw updateError;
+      }
+      
+      // Store results in fitment_score table
+      const { data: scoreData, error: scoreError } = await supabase
+        .from('fitment_score')
+        .insert({
+          name: testResults.name,
+          fitment_score: testResults.fitmentScore,
+          extroversion_score: testResults.personalityScores?.extroversion || 0,
+          agreeableness_score: testResults.personalityScores?.agreeableness || 0,
+          openness_score: testResults.personalityScores?.openness || 0,
+          neuroticism_score: testResults.personalityScores?.neuroticism || 0,
+          conscientiousness_score: testResults.personalityScores?.conscientiousness || 0
+        })
+        .select()
+        .single();
+        
+      if (scoreError) {
+        console.error("Error storing fitment score:", scoreError);
+        throw scoreError;
+      }
+
+      // Get candidate resume information to update the users table
+      const { data: resumeData, error: resumeError } = await supabase
+        .from('candidate_resume')
+        .select('*')
+        .eq('email', testResults.email)
+        .single();
+
+      if (!resumeError && resumeData) {
+        // Check if user exists in users table
+        const { data: existingUser, error: userQueryError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', testResults.email)
+          .maybeSingle();
+
+        if (userQueryError) {
+          console.error("Error checking for existing user:", userQueryError);
+        }
+
+        if (!existingUser) {
+          // Create new user if doesn't exist
+          const { error: userInsertError } = await supabase
+            .from('users')
+            .insert({
+              name: testResults.name,
+              email: testResults.email,
+              score: testResults.fitmentScore
+            });
+
+          if (userInsertError) {
+            console.error("Error creating user record:", userInsertError);
+          }
+        } else {
+          // Update existing user with new score
+          const { error: userUpdateError } = await supabase
+            .from('users')
+            .update({ score: testResults.fitmentScore })
+            .eq('email', testResults.email);
+
+          if (userUpdateError) {
+            console.error("Error updating user score:", userUpdateError);
+          }
+        }
+      }
+
+      return new Response(JSON.stringify({ 
+        success: true,
+        message: 'Results stored successfully',
+        scoreId: scoreData?.id
+      }), {
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        },
+        status: 200
+      });
+    }
+
+    // Generate unique token for new invitation
     const token = generateToken();
 
     // Store invitation in database using the correct schema

@@ -93,36 +93,36 @@ export type Database = {
         }
         Relationships: []
       }
-      "fitment score": {
+      fitment_score: {
         Row: {
-          agreeable: number | null
-          conciousness: number | null
-          extro: number | null
-          FitmentScore: number | null
-          id: number
-          Name: string
-          neuroticism: number | null
-          openness: number | null
+          agreeableness_score: number | null
+          conscientiousness_score: number | null
+          extroversion_score: number | null
+          fitment_score: number | null
+          id: string
+          name: string | null
+          neuroticism_score: number | null
+          openness_score: number | null
         }
         Insert: {
-          agreeable?: number | null
-          conciousness?: number | null
-          extro?: number | null
-          FitmentScore?: number | null
-          id?: number
-          Name: string
-          neuroticism?: number | null
-          openness?: number | null
+          agreeableness_score?: number | null
+          conscientiousness_score?: number | null
+          extroversion_score?: number | null
+          fitment_score?: number | null
+          id?: string
+          name?: string | null
+          neuroticism_score?: number | null
+          openness_score?: number | null
         }
         Update: {
-          agreeable?: number | null
-          conciousness?: number | null
-          extro?: number | null
-          FitmentScore?: number | null
-          id?: number
-          Name?: string
-          neuroticism?: number | null
-          openness?: number | null
+          agreeableness_score?: number | null
+          conscientiousness_score?: number | null
+          extroversion_score?: number | null
+          fitment_score?: number | null
+          id?: string
+          name?: string | null
+          neuroticism_score?: number | null
+          openness_score?: number | null
         }
         Relationships: []
       }

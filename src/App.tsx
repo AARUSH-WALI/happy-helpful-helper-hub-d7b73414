@@ -11,6 +11,7 @@ import Jobs from "./pages/Jobs";
 import Interview from "./pages/Interview";
 import Resume from "./pages/Resume";
 import NotFound from "./pages/NotFound";
+import PersonalityTest from "./components/PersonalityTest";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
               <Resume />
             </MainLayout>
           } />
+          <Route path="/personality-test" element={<PersonalityTest />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
