@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { FileText, Trash, Plus, Save } from "lucide-react";
+import { FileText, Trash, Plus, Save, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,57 +11,81 @@ import { useToast } from "@/hooks/use-toast";
 import { ResumeData, Education, Experience } from "@/types/resume";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface ResumeFormProps {
   resumeData: ResumeData;
   setResumeData: React.Dispatch<React.SetStateAction<ResumeData | null>>;
   parsedFile: File | null;
+  jsonData: string;
+  setJsonData: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export default function ResumeForm({ resumeData, setResumeData, parsedFile }: ResumeFormProps) {
+export default function ResumeForm({ resumeData, setResumeData, parsedFile, jsonData, setJsonData }: ResumeFormProps) {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
+  const [showJsonDialog, setShowJsonDialog] = useState(false);
   
   const handlePersonalInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setResumeData({
+    const updatedData = {
       ...resumeData,
       personalInfo: {
         ...resumeData.personalInfo,
         [name]: value
       }
-    });
+    };
+    
+    setResumeData(updatedData);
+    
+    // Update JSON data
+    setJsonData(JSON.stringify(updatedData, null, 2));
   };
   
   const handleEducationChange = (index: number, field: keyof Education, value: string) => {
     const updatedEducation = [...resumeData.education];
     updatedEducation[index] = { ...updatedEducation[index], [field]: value };
     
-    setResumeData({
+    const updatedData = {
       ...resumeData,
       education: updatedEducation
-    });
+    };
+    
+    setResumeData(updatedData);
+    
+    // Update JSON data
+    setJsonData(JSON.stringify(updatedData, null, 2));
   };
   
   const handleExperienceChange = (index: number, field: keyof Experience, value: string) => {
     const updatedExperience = [...resumeData.experience];
     updatedExperience[index] = { ...updatedExperience[index], [field]: value };
     
-    setResumeData({
+    const updatedData = {
       ...resumeData,
       experience: updatedExperience
-    });
+    };
+    
+    setResumeData(updatedData);
+    
+    // Update JSON data
+    setJsonData(JSON.stringify(updatedData, null, 2));
   };
 
   const handleStringArrayChange = (field: keyof ResumeData, value: string) => {
     const array = value.split(',').map(item => item.trim()).filter(Boolean);
     
-    setResumeData({
+    const updatedData = {
       ...resumeData,
       [field]: array,
       [`${field}Count` as keyof ResumeData]: array.length
-    });
+    };
+    
+    setResumeData(updatedData);
+    
+    // Update JSON data
+    setJsonData(JSON.stringify(updatedData, null, 2));
   };
   
   const handleNumberChange = (field: keyof ResumeData, value: string) => {
@@ -80,69 +103,112 @@ export default function ResumeForm({ resumeData, setResumeData, parsedFile }: Re
       
       const avgExp = jobs > 0 ? longevity / jobs : 0;
       
-      setResumeData(prev => ({
-        ...prev!,
-        averageExperience: parseFloat(avgExp.toFixed(2))
-      }));
+      setResumeData(prev => {
+        const updated = {
+          ...prev!,
+          averageExperience: parseFloat(avgExp.toFixed(2))
+        };
+        
+        // Update JSON data
+        setJsonData(JSON.stringify(updated, null, 2));
+        return updated;
+      });
+    } else {
+      // Update JSON data for other fields
+      const updatedData = {
+        ...resumeData,
+        [field]: numValue
+      };
+      setJsonData(JSON.stringify(updatedData, null, 2));
     }
   };
   
   const handleRadioChange = (field: keyof ResumeData, value: string) => {
-    setResumeData({
+    const updatedData = {
       ...resumeData,
       [field]: Number(value)
-    });
+    };
+    
+    setResumeData(updatedData);
+    
+    // Update JSON data
+    setJsonData(JSON.stringify(updatedData, null, 2));
   };
   
   const addEducation = () => {
-    setResumeData({
+    const updatedData = {
       ...resumeData,
       education: [
         ...resumeData.education,
         { institution: "", degree: "" }
       ]
-    });
+    };
+    
+    setResumeData(updatedData);
+    
+    // Update JSON data
+    setJsonData(JSON.stringify(updatedData, null, 2));
   };
   
   const removeEducation = (index: number) => {
     const updatedEducation = [...resumeData.education];
     updatedEducation.splice(index, 1);
     
-    setResumeData({
+    const updatedData = {
       ...resumeData,
       education: updatedEducation
-    });
+    };
+    
+    setResumeData(updatedData);
+    
+    // Update JSON data
+    setJsonData(JSON.stringify(updatedData, null, 2));
   };
   
   const addExperience = () => {
-    setResumeData({
+    const updatedData = {
       ...resumeData,
       experience: [
         ...resumeData.experience,
         { company: "", position: "" }
       ]
-    });
+    };
+    
+    setResumeData(updatedData);
+    
+    // Update JSON data
+    setJsonData(JSON.stringify(updatedData, null, 2));
   };
   
   const removeExperience = (index: number) => {
     const updatedExperience = [...resumeData.experience];
     updatedExperience.splice(index, 1);
     
-    setResumeData({
+    const updatedData = {
       ...resumeData,
       experience: updatedExperience
-    });
+    };
+    
+    setResumeData(updatedData);
+    
+    // Update JSON data
+    setJsonData(JSON.stringify(updatedData, null, 2));
   };
   
   const handleSkillChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const skillsText = e.target.value;
     const skillsArray = skillsText.split(',').map(skill => skill.trim()).filter(Boolean);
     
-    setResumeData({
+    const updatedData = {
       ...resumeData,
       skills: skillsArray,
       skillsCount: skillsArray.length
-    });
+    };
+    
+    setResumeData(updatedData);
+    
+    // Update JSON data
+    setJsonData(JSON.stringify(updatedData, null, 2));
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -151,6 +217,8 @@ export default function ResumeForm({ resumeData, setResumeData, parsedFile }: Re
     
     try {
       // In a real application, you would send the data to your backend here
+      // Here we're just sending the JSON data
+      console.log("Submitting JSON data:", jsonData);
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       toast({
@@ -169,45 +237,99 @@ export default function ResumeForm({ resumeData, setResumeData, parsedFile }: Re
     }
   };
   
+  const copyJsonToClipboard = () => {
+    navigator.clipboard.writeText(jsonData);
+    toast({
+      title: "JSON copied",
+      description: "Resume data JSON copied to clipboard.",
+    });
+  };
+  
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* File Information */}
-      <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-md border border-purple-100 shadow-sm">
-        <FileText size={24} className="text-purple-600" />
-        <div>
-          <p className="font-medium">{parsedFile?.name}</p>
-          <p className="text-sm text-purple-700">
-            {parsedFile && `${(parsedFile.size / (1024 * 1024)).toFixed(2)} MB`}
-          </p>
+      <div className="flex items-center justify-between gap-3 p-4 bg-purple-100 rounded-md border border-purple-200 shadow-sm">
+        <div className="flex items-center gap-3">
+          <FileText size={24} className="text-purple-600" />
+          <div>
+            <p className="font-medium">{parsedFile?.name}</p>
+            <p className="text-sm text-purple-700">
+              {parsedFile && `${(parsedFile.size / (1024 * 1024)).toFixed(2)} MB`}
+            </p>
+          </div>
         </div>
+        
+        <Dialog open={showJsonDialog} onOpenChange={setShowJsonDialog}>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              className="border-purple-300 hover:bg-purple-200 hover:text-purple-800"
+            >
+              <Code className="w-4 h-4 mr-2" /> View JSON
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-auto bg-white">
+            <DialogHeader>
+              <DialogTitle className="flex justify-between items-center">
+                <span>Resume Data (JSON)</span>
+                <Button 
+                  onClick={copyJsonToClipboard} 
+                  variant="secondary"
+                  size="sm"
+                  className="bg-purple-100 hover:bg-purple-200 text-purple-800"
+                >
+                  Copy to Clipboard
+                </Button>
+              </DialogTitle>
+            </DialogHeader>
+            <pre className="bg-gray-50 p-4 rounded-md overflow-auto text-sm border border-gray-200 max-h-[60vh]">
+              {jsonData}
+            </pre>
+          </DialogContent>
+        </Dialog>
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-5 mb-8">
-          <TabsTrigger value="personal" className="text-sm">
+        <TabsList className="grid grid-cols-5 mb-8 bg-purple-100">
+          <TabsTrigger 
+            value="personal" 
+            className="text-sm data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+          >
             Personal Info
           </TabsTrigger>
-          <TabsTrigger value="education" className="text-sm">
+          <TabsTrigger 
+            value="education" 
+            className="text-sm data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+          >
             Education
           </TabsTrigger>
-          <TabsTrigger value="experience" className="text-sm">
+          <TabsTrigger 
+            value="experience" 
+            className="text-sm data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+          >
             Experience
           </TabsTrigger>
-          <TabsTrigger value="skills" className="text-sm">
+          <TabsTrigger 
+            value="skills" 
+            className="text-sm data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+          >
             Skills & Projects
           </TabsTrigger>
-          <TabsTrigger value="publications" className="text-sm">
+          <TabsTrigger 
+            value="publications" 
+            className="text-sm data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+          >
             Publications
           </TabsTrigger>
         </TabsList>
         
         {/* Personal Information */}
         <TabsContent value="personal">
-          <Card className="shadow-sm border-purple-100">
-            <CardHeader className="bg-purple-50 pb-3 border-b border-purple-100">
+          <Card className="shadow-sm border-purple-200">
+            <CardHeader className="bg-purple-100 pb-3 border-b border-purple-200">
               <CardTitle>Personal Information</CardTitle>
             </CardHeader>
-            <CardContent className="grid gap-6 pt-6">
+            <CardContent className="grid gap-6 pt-6 bg-white">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
@@ -333,14 +455,14 @@ export default function ResumeForm({ resumeData, setResumeData, parsedFile }: Re
         
         {/* Education */}
         <TabsContent value="education">
-          <Card className="shadow-sm border-purple-100">
-            <CardHeader className="bg-purple-50 pb-3 border-b border-purple-100 flex flex-row items-center justify-between">
+          <Card className="shadow-sm border-purple-200">
+            <CardHeader className="bg-purple-100 pb-3 border-b border-purple-200 flex flex-row items-center justify-between">
               <CardTitle>Education</CardTitle>
-              <Button type="button" variant="outline" size="sm" onClick={addEducation} className="border-purple-200 hover:bg-purple-50 hover:text-purple-700">
+              <Button type="button" variant="outline" size="sm" onClick={addEducation} className="border-purple-300 hover:bg-purple-200 hover:text-purple-800">
                 <Plus className="mr-1 h-4 w-4" /> Add Education
               </Button>
             </CardHeader>
-            <CardContent className="space-y-6 pt-6">
+            <CardContent className="space-y-6 pt-6 bg-white">
               {resumeData.education.map((edu, index) => (
                 <div key={index} className="space-y-4">
                   {index > 0 && <Separator className="my-6" />}
@@ -433,7 +555,7 @@ export default function ResumeForm({ resumeData, setResumeData, parsedFile }: Re
                     type="button" 
                     variant="outline" 
                     onClick={addEducation}
-                    className="border-purple-200 hover:bg-purple-50 hover:text-purple-700"
+                    className="border-purple-300 hover:bg-purple-200 hover:text-purple-800"
                   >
                     <Plus className="mr-1 h-4 w-4" /> Add Education
                   </Button>
@@ -445,14 +567,14 @@ export default function ResumeForm({ resumeData, setResumeData, parsedFile }: Re
         
         {/* Experience */}
         <TabsContent value="experience">
-          <Card className="shadow-sm border-purple-100">
-            <CardHeader className="bg-purple-50 pb-3 border-b border-purple-100 flex flex-row items-center justify-between">
+          <Card className="shadow-sm border-purple-200">
+            <CardHeader className="bg-purple-100 pb-3 border-b border-purple-200 flex flex-row items-center justify-between">
               <CardTitle>Work Experience</CardTitle>
-              <Button type="button" variant="outline" size="sm" onClick={addExperience} className="border-purple-200 hover:bg-purple-50 hover:text-purple-700">
+              <Button type="button" variant="outline" size="sm" onClick={addExperience} className="border-purple-300 hover:bg-purple-200 hover:text-purple-800">
                 <Plus className="mr-1 h-4 w-4" /> Add Experience
               </Button>
             </CardHeader>
-            <CardContent className="space-y-6 pt-6">
+            <CardContent className="space-y-6 pt-6 bg-white">
               {resumeData.experience.map((exp, index) => (
                 <div key={index} className="space-y-4">
                   {index > 0 && <Separator className="my-6" />}
@@ -536,7 +658,7 @@ export default function ResumeForm({ resumeData, setResumeData, parsedFile }: Re
                 </div>
               ))}
               
-              <Card className="bg-purple-50 shadow-none border-purple-100">
+              <Card className="bg-purple-50 shadow-none border-purple-200">
                 <CardContent className="pt-4 pb-4">
                   <h3 className="font-medium text-lg text-purple-800 mb-4">Experience Metrics</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -587,7 +709,7 @@ export default function ResumeForm({ resumeData, setResumeData, parsedFile }: Re
                     type="button" 
                     variant="outline" 
                     onClick={addExperience}
-                    className="border-purple-200 hover:bg-purple-50 hover:text-purple-700"
+                    className="border-purple-300 hover:bg-purple-200 hover:text-purple-800"
                   >
                     <Plus className="mr-1 h-4 w-4" /> Add Experience
                   </Button>
@@ -600,11 +722,11 @@ export default function ResumeForm({ resumeData, setResumeData, parsedFile }: Re
         {/* Skills & Projects */}
         <TabsContent value="skills">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="shadow-sm border-purple-100">
-              <CardHeader className="bg-purple-50 pb-3 border-b border-purple-100">
+            <Card className="shadow-sm border-purple-200">
+              <CardHeader className="bg-purple-100 pb-3 border-b border-purple-200">
                 <CardTitle>Skills</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 pt-6">
+              <CardContent className="space-y-4 pt-6 bg-white">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="skills" className="text-sm font-medium">Skills (comma separated)</Label>
@@ -632,11 +754,11 @@ export default function ResumeForm({ resumeData, setResumeData, parsedFile }: Re
               </CardContent>
             </Card>
             
-            <Card className="shadow-sm border-purple-100">
-              <CardHeader className="bg-purple-50 pb-3 border-b border-purple-100">
+            <Card className="shadow-sm border-purple-200">
+              <CardHeader className="bg-purple-100 pb-3 border-b border-purple-200">
                 <CardTitle>Projects</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 pt-6">
+              <CardContent className="space-y-4 pt-6 bg-white">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="projects" className="text-sm font-medium">Projects (comma separated)</Label>
@@ -664,11 +786,11 @@ export default function ResumeForm({ resumeData, setResumeData, parsedFile }: Re
               </CardContent>
             </Card>
             
-            <Card className="shadow-sm border-purple-100">
-              <CardHeader className="bg-purple-50 pb-3 border-b border-purple-100">
+            <Card className="shadow-sm border-purple-200">
+              <CardHeader className="bg-purple-100 pb-3 border-b border-purple-200">
                 <CardTitle>Achievements</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 pt-6">
+              <CardContent className="space-y-4 pt-6 bg-white">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="achievements" className="text-sm font-medium">Achievements (comma separated)</Label>
@@ -696,11 +818,11 @@ export default function ResumeForm({ resumeData, setResumeData, parsedFile }: Re
               </CardContent>
             </Card>
             
-            <Card className="shadow-sm border-purple-100">
-              <CardHeader className="bg-purple-50 pb-3 border-b border-purple-100">
+            <Card className="shadow-sm border-purple-200">
+              <CardHeader className="bg-purple-100 pb-3 border-b border-purple-200">
                 <CardTitle>Training & Workshops</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6 pt-6">
+              <CardContent className="space-y-6 pt-6 bg-white">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -735,11 +857,11 @@ export default function ResumeForm({ resumeData, setResumeData, parsedFile }: Re
         
         {/* Publications */}
         <TabsContent value="publications">
-          <Card className="shadow-sm border-purple-100">
-            <CardHeader className="bg-purple-50 pb-3 border-b border-purple-100">
+          <Card className="shadow-sm border-purple-200">
+            <CardHeader className="bg-purple-100 pb-3 border-b border-purple-200">
               <CardTitle>Academic Publications</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6 pt-6">
+            <CardContent className="space-y-6 pt-6 bg-white">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="researchPapers" className="text-sm font-medium">Research Papers (comma separated)</Label>
@@ -776,23 +898,34 @@ export default function ResumeForm({ resumeData, setResumeData, parsedFile }: Re
         </TabsContent>
       </Tabs>
       
-      <div className="sticky bottom-0 bg-white p-4 border-t border-purple-100 rounded-md shadow-md">
-        <div className="flex justify-end gap-4">
+      <div className="sticky bottom-0 bg-white p-4 border-t border-purple-200 rounded-md shadow-md">
+        <div className="flex justify-between items-center">
           <Button 
             type="button" 
             variant="outline" 
-            onClick={() => window.history.back()}
-            className="border-purple-200"
+            onClick={() => setShowJsonDialog(true)}
+            className="border-purple-300 hover:bg-purple-200 hover:text-purple-800"
           >
-            Cancel
+            <Code className="w-4 h-4 mr-2" /> View JSON Data
           </Button>
-          <Button 
-            type="submit"
-            className="bg-purple-600 hover:bg-purple-700 text-white"
-            disabled={submitting}
-          >
-            {submitting ? "Saving..." : <><Save className="w-4 h-4 mr-2" /> Save Candidate Data</>}
-          </Button>
+          
+          <div className="flex gap-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => window.history.back()}
+              className="border-purple-200"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit"
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+              disabled={submitting}
+            >
+              {submitting ? "Saving..." : <><Save className="w-4 h-4 mr-2" /> Save Candidate Data</>}
+            </Button>
+          </div>
         </div>
       </div>
     </form>
