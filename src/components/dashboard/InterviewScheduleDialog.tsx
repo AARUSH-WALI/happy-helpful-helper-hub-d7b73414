@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { format } from "date-fns";
+import { Clock } from "lucide-react";
 
 interface ScheduledInterview {
   name: string;
@@ -30,20 +31,26 @@ export default function InterviewScheduleDialog({ isOpen, onClose }: InterviewSc
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Today's Interview Schedule</DialogTitle>
+      <DialogContent className="sm:max-w-[425px] border border-purple-100">
+        <DialogHeader className="bg-purple-50 -mx-6 -mt-6 px-6 py-4 rounded-t-xl">
+          <DialogTitle className="text-purple-800 flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Today's Interview Schedule
+          </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="space-y-3 mt-2">
           {interviews.map((interview, index) => (
-            <div key={index} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div 
+              key={index} 
+              className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-50 to-purple-100/50 rounded-lg border border-purple-100 hover:shadow-sm transition-all"
+            >
               <div>
-                <p className="font-medium">{interview.name}</p>
-                <p className="text-sm text-gray-500">{interview.role}</p>
+                <p className="font-medium text-purple-800">{interview.name}</p>
+                <p className="text-sm text-gray-600">{interview.role}</p>
               </div>
-              <p className="text-sm font-medium">
+              <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-purple-700 border border-purple-200 flex items-center">
                 {format(interview.time, "hh:mm a")}
-              </p>
+              </div>
             </div>
           ))}
         </div>
