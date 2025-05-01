@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Briefcase, Calendar, Users, FileText } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
@@ -186,11 +187,6 @@ export default function Dashboard() {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <RecentActivity />
-        <CandidateStatus approvedCount={45} reviewCount={30} rejectedCount={25} />
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
           <JobFitmentTable 
             jobRoles={jobRoles}
@@ -202,6 +198,11 @@ export default function Dashboard() {
         <div className="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
           <CandidateScores candidates={candidates} />
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <RecentActivity />
+        <CandidateStatus approvedCount={45} reviewCount={30} rejectedCount={25} />
       </div>
 
       <InterviewScheduleDialog 
