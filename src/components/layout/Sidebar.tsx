@@ -26,7 +26,7 @@ export default function Sidebar() {
       icon: LayoutDashboard,
     },
     {
-      name: "Users",
+      name: "Candidates",
       path: "/users",
       icon: Users,
     },

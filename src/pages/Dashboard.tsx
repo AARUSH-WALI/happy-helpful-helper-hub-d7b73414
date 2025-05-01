@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Briefcase, Calendar, Users, FileText } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
@@ -5,6 +6,8 @@ import VacancyStats from "@/components/dashboard/VacancyStats";
 import JobFitmentTable from "@/components/dashboard/JobFitmentTable";
 import CandidateScores from "@/components/dashboard/CandidateScores";
 import InterviewScheduleDialog from "@/components/dashboard/InterviewScheduleDialog";
+import RecentActivity from "@/components/dashboard/RecentActivity";
+import CandidateStatus from "@/components/dashboard/CandidateStatus";
 
 const vacancyData = [
   { name: "Jan", value: 12 },
@@ -145,7 +148,7 @@ export default function Dashboard() {
   const [showInterviews, setShowInterviews] = useState(false);
 
   return (
-    <div className="page-container dark:bg-gray-900">
+    <div className="page-container bg-gray-950 text-white">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard 
           value="7"
@@ -179,12 +182,17 @@ export default function Dashboard() {
           icon={<Calendar size={40} className="text-blue" />}
           color="rose"
           onClick={() => setShowInterviews(true)}
-          className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-xl"
+          className="cursor-pointer hover:bg-gray-900 transition-colors shadow-xl"
         />
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="shadow-2xl rounded-lg">
+        <RecentActivity />
+        <CandidateStatus approvedCount={45} reviewCount={30} rejectedCount={25} />
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="bg-gray-900 shadow-2xl rounded-lg overflow-hidden">
           <JobFitmentTable 
             jobRoles={jobRoles}
             fitCategories={fitCategories}
@@ -192,7 +200,7 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="shadow-2xl rounded-lg">
+        <div className="bg-gray-900 shadow-2xl rounded-lg overflow-hidden">
           <CandidateScores candidates={candidates} />
         </div>
       </div>
