@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Briefcase, Calendar, Users, FileText } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
@@ -148,14 +147,14 @@ export default function Dashboard() {
   const [showInterviews, setShowInterviews] = useState(false);
 
   return (
-    <div className="page-container bg-gray-950 text-white">
+    <div className="page-container bg-white text-gray-800">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard 
           value="7"
           title="Job Applications"
           icon={<Users size={40} className="text-white" />}
           color="purple"
-          className="shadow-xl"
+          className="shadow-md"
         />
         
         <StatCard 
@@ -163,7 +162,7 @@ export default function Dashboard() {
           title="Hired Candidates"
           icon={<Briefcase size={40} className="text-white" />}
           color="blue"
-          className="relative overflow-hidden shadow-xl"
+          className="relative overflow-hidden shadow-md"
         >
           {/* <VacancyStats data={vacancyData} /> */}
         </StatCard>
@@ -173,7 +172,7 @@ export default function Dashboard() {
           title="Resumes for Review"
           icon={<FileText size={40} className="text-white" />}
           color="green"
-          className="shadow-xl"
+          className="shadow-md"
         />
         
         <StatCard 
@@ -182,7 +181,7 @@ export default function Dashboard() {
           icon={<Calendar size={40} className="text-blue" />}
           color="rose"
           onClick={() => setShowInterviews(true)}
-          className="cursor-pointer hover:bg-gray-900 transition-colors shadow-xl"
+          className="cursor-pointer hover:bg-gray-100 transition-colors shadow-md"
         />
       </div>
       
@@ -192,7 +191,7 @@ export default function Dashboard() {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="bg-gray-900 shadow-2xl rounded-lg overflow-hidden">
+        <div className="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
           <JobFitmentTable 
             jobRoles={jobRoles}
             fitCategories={fitCategories}
@@ -200,7 +199,7 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="bg-gray-900 shadow-2xl rounded-lg overflow-hidden">
+        <div className="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
           <CandidateScores candidates={candidates} />
         </div>
       </div>

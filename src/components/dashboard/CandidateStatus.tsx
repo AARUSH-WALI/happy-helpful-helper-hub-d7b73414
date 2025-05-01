@@ -49,9 +49,9 @@ export default function CandidateStatus({
   };
 
   return (
-    <div className="bg-gray-900 rounded-lg shadow-lg overflow-hidden">
-      <div className="p-6 border-b border-gray-800">
-        <h2 className="text-2xl font-bold text-white">Candidate Status</h2>
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+      <div className="p-6 border-b border-gray-200">
+        <h2 className="text-2xl font-bold text-gray-800">Candidate Status</h2>
       </div>
       <div className="p-6">
         <div className="h-64">
@@ -67,7 +67,7 @@ export default function CandidateStatus({
                 innerRadius={40}
                 dataKey="value"
                 strokeWidth={5}
-                stroke="#111827"
+                stroke="#ffffff"
               >
                 {data.map((entry, index) => (
                   <Cell
@@ -83,30 +83,30 @@ export default function CandidateStatus({
         <div className="flex flex-wrap justify-center gap-4 mt-4">
           <div className="text-center">
             <div className="text-4xl font-bold text-purple-400">{approvedCount}</div>
-            <div className="text-gray-400">Approved</div>
+            <div className="text-gray-600">Approved</div>
           </div>
           <div className="text-center">
             <div className="text-4xl font-bold text-blue-400">{reviewCount}</div>
-            <div className="text-gray-400">Under Review</div>
+            <div className="text-gray-600">Under Review</div>
           </div>
           <div className="text-center">
             <div className="text-4xl font-bold text-red-400">{rejectedCount}</div>
-            <div className="text-gray-400">Rejected</div>
+            <div className="text-gray-600">Rejected</div>
           </div>
         </div>
 
         <div className="space-y-2 mt-6">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-purple-400"></div>
-            <span className="text-sm text-purple-400">Approved</span>
+            <span className="text-sm text-gray-700">Approved</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-400"></div>
-            <span className="text-sm text-blue-400">Under Review</span>
+            <span className="text-sm text-gray-700">Under Review</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-red-400"></div>
-            <span className="text-sm text-red-400">Rejected</span>
+            <span className="text-sm text-gray-700">Rejected</span>
           </div>
         </div>
       </div>

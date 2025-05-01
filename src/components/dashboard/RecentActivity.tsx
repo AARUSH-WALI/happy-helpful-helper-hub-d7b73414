@@ -66,13 +66,13 @@ export default function RecentActivity() {
   const getStatusBadgeClasses = (status: CandidateActivityStatus) => {
     switch (status) {
       case "Approved":
-        return "bg-green-900/20 text-green-400 border-green-700";
+        return "bg-green-100 text-green-700 border-green-300";
       case "Reviewing":
-        return "bg-yellow-900/20 text-yellow-400 border-yellow-700";
+        return "bg-yellow-100 text-yellow-700 border-yellow-300";
       case "Rejected":
-        return "bg-red-900/20 text-red-400 border-red-700";
+        return "bg-red-100 text-red-700 border-red-300";
       default:
-        return "bg-gray-900/20 text-gray-400 border-gray-700";
+        return "bg-gray-100 text-gray-700 border-gray-300";
     }
   };
 
@@ -88,17 +88,17 @@ export default function RecentActivity() {
   };
 
   return (
-    <div className="bg-gray-900 rounded-lg shadow-lg overflow-hidden">
-      <div className="p-6 flex justify-between items-center border-b border-gray-800">
-        <h2 className="text-2xl font-bold text-white">Recent Activity</h2>
-        <button className="text-purple-400 hover:text-purple-300 text-sm">
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+      <div className="p-6 flex justify-between items-center border-b border-gray-200">
+        <h2 className="text-2xl font-bold text-gray-800">Recent Activity</h2>
+        <button className="text-purple-600 hover:text-purple-800 text-sm">
           View All
         </button>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-gray-900 text-gray-400 border-b border-gray-800">
+            <tr className="bg-gray-50 text-gray-600 border-b border-gray-200">
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                 Candidate
               </th>
@@ -116,16 +116,16 @@ export default function RecentActivity() {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-800">
+          <tbody className="divide-y divide-gray-200">
             {activities.map((activity) => (
-              <tr key={activity.id} className="hover:bg-gray-800/50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+              <tr key={activity.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
                   {activity.name}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                   {activity.position}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                   {activity.department}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -137,7 +137,7 @@ export default function RecentActivity() {
                     {activity.status === "Reviewing" ? "Reviewing" : activity.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 text-right">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
                   {getFormattedTime(activity.updatedAt)}
                 </td>
               </tr>
