@@ -12,6 +12,8 @@ import Interview from "./pages/Interview";
 import Resume from "./pages/Resume";
 import NotFound from "./pages/NotFound";
 import PersonalityTest from "./components/PersonalityTest";
+import RecentActivity from "./components/dashboard/RecentActivity";
+import CandidateStatus from "./components/dashboard/CandidateStatus";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,16 @@ const App = () => (
           <Route path="/resume" element={
             <MainLayout>
               <Resume />
+            </MainLayout>
+          } />
+          <Route path="/recent-activity" element={
+            <MainLayout>
+              <RecentActivity />
+            </MainLayout>
+          } />
+          <Route path="/candidate-status" element={
+            <MainLayout>
+              <CandidateStatus approvedCount={45} reviewCount={30} rejectedCount={25} />
             </MainLayout>
           } />
           <Route path="/personality-test" element={<PersonalityTest />} />

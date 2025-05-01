@@ -6,7 +6,9 @@ import {
   Briefcase, 
   CalendarDays, 
   Menu,
-  FileText
+  FileText,
+  Activity,
+  PieChart
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -44,6 +46,16 @@ export default function Sidebar() {
       name: "Resume",
       path: "/resume",
       icon: FileText,
+    },
+    {
+      name: "Recent Activity",
+      path: "/recent-activity",
+      icon: Activity,
+    },
+    {
+      name: "Candidate Status",
+      path: "/candidate-status",
+      icon: PieChart,
     },
   ];
   
