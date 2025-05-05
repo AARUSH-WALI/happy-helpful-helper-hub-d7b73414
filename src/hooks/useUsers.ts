@@ -11,6 +11,7 @@ export interface UserProfile {
   experience?: string;
   education?: string;
   about?: string;
+  profileImage?: string;
   personalityScores?: {
     extroversion: number;
     agreeableness: number;

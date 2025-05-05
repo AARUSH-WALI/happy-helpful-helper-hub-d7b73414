@@ -4,6 +4,7 @@ import { RefreshCw } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocation } from "react-router-dom";
 import UserDetailsDialog from "@/components/users/UserDetailsDialog";
+import { Progress } from "@/components/ui/progress";
 
 interface UserProfile {
   id: string;
