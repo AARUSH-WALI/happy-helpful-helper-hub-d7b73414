@@ -1,5 +1,8 @@
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 interface Employee {
   name: string;
@@ -16,6 +19,7 @@ interface JobFitmentTableProps {
 export default function JobFitmentTable({ jobRoles, fitCategories, employees }: JobFitmentTableProps) {
   const [selectedRole, setSelectedRole] = useState<string>("all");
   const [selectedFitment, setSelectedFitment] = useState<string>("all");
+  const [showAll, setShowAll] = useState(false);
 
   // Update the fitment for specific employees
   const updatedEmployees = employees.map((employee) => {
@@ -33,11 +37,22 @@ export default function JobFitmentTable({ jobRoles, fitCategories, employees }: 
     const fitMatch = selectedFitment === "all" || employee.fitment === selectedFitment;
     return roleMatch && fitMatch;
   });
+  
+  // Display only 5 employees by default
+  const displayedEmployees = showAll ? filteredEmployees : filteredEmployees.slice(0, 5);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-2xl">
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-2xl h-full flex flex-col">
       <div className="space-y-4">
-        <h3 className="text-2xl font-extrabold text-indigo-600">Job Fitment</h3>
+        <div className="flex justify-between items-center">
+          <h3 className="text-2xl font-extrabold text-indigo-600">Job Fitment</h3>
+          {filteredEmployees.length > 5 && (
+            <Button variant="ghost" size="sm" onClick={() => setShowAll(!showAll)} className="flex items-center gap-2">
+              {showAll ? "Show Less" : "View All"}
+              <ArrowRight size={16} />
+            </Button>
+          )}
+        </div>
         <div className="flex flex-col space-y-4">
           <Select value={selectedRole} onValueChange={setSelectedRole}>
             <SelectTrigger className="w-full border-2 border-indigo-600 rounded-lg focus:ring-indigo-500">
@@ -69,7 +84,7 @@ export default function JobFitmentTable({ jobRoles, fitCategories, employees }: 
         </div>
       </div>
 
-      <div className="overflow-x-auto mt-6">
+      <div className="overflow-x-auto mt-6 flex-grow">
         <table className="min-w-full border-separate border-spacing-0 rounded-lg shadow-lg">
           <thead>
             <tr className="bg-indigo-500 text-white">
@@ -79,7 +94,7 @@ export default function JobFitmentTable({ jobRoles, fitCategories, employees }: 
             </tr>
           </thead>
           <tbody className="bg-white">
-            {filteredEmployees.map((employee, index) => (
+            {displayedEmployees.map((employee, index) => (
               <tr key={index} className="hover:bg-indigo-100 transition-colors">
                 <td className="py-3 px-6 border-t border-gray-100 text-lg font-semibold text-gray-800">{employee.name}</td>
                 <td className="py-3 px-6 border-t border-gray-100 text-lg font-semibold text-gray-800">{employee.role}</td>

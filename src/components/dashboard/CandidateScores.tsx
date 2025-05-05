@@ -1,4 +1,5 @@
 
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
@@ -27,7 +28,7 @@ export default function CandidateScores({ candidates }: CandidateScoresProps) {
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400">
           Candidate Fitment Scores
@@ -40,7 +41,7 @@ export default function CandidateScores({ candidates }: CandidateScoresProps) {
         </Button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 flex-grow">
         {candidates.map((candidate) => (
           <div
             key={candidate.email}
