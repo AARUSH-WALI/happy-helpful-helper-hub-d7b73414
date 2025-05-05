@@ -38,15 +38,15 @@ export default function JobFitmentTable({ jobRoles, fitCategories, employees }: 
     return roleMatch && fitMatch;
   });
   
-  // Display only 5 employees by default
-  const displayedEmployees = showAll ? filteredEmployees : filteredEmployees.slice(0, 5);
+  // Display only 7 employees by default (updated from 5 to 7)
+  const displayedEmployees = showAll ? filteredEmployees : filteredEmployees.slice(0, 7);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-2xl h-full flex flex-col">
+    <div className="bg-white rounded-lg p-6 shadow-2xl h-full flex flex-col">
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="text-2xl font-extrabold text-indigo-600">Job Fitment</h3>
-          {filteredEmployees.length > 5 && (
+          {filteredEmployees.length > 7 && (
             <Button variant="ghost" size="sm" onClick={() => setShowAll(!showAll)} className="flex items-center gap-2">
               {showAll ? "Show Less" : "View All"}
               <ArrowRight size={16} />

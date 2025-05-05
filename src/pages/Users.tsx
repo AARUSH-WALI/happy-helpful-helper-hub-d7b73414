@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, ChevronLeft } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
+import { useLocation } from "react-router-dom";
+import UserDetailsDialog from "@/components/users/UserDetailsDialog";
 
 interface UserProfile {
   id: string;
@@ -21,7 +21,7 @@ interface UserProfile {
     neuroticism: number;
     conscientiousness: number;
   };
-  profileImage?: string; // Added profileImage field for image path
+  profileImage?: string;
 }
 
 const users: UserProfile[] = [
@@ -207,6 +207,20 @@ const PersonalityBar = ({
 
 export default function Users() {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const location = useLocation();
+  
+  // Check for selectedId in URL query params
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const selectedId = queryParams.get('selected');
+    
+    if (selectedId) {
+      const user = users.find(user => user.id === selectedId);
+      if (user) {
+        setSelectedUser(user);
+      }
+    }
+  }, [location.search]);
 
   return (
     <div className="page-container">
@@ -264,100 +278,11 @@ export default function Users() {
         </div>
       </div>
 
-      <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSelectedUser(null)}
-                className="h-8 w-8"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span>Candidate Profile</span>
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedUser && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  {/* Displaying profile image dynamically based on user */}
-                  <div className="aspect-square w-full max-w-[200px] mx-auto bg-gray-100 rounded-lg flex items-center justify-center">
-                    <img src={selectedUser.profileImage} alt="Profile" className="w-full h object-cover rounded-lg" />
-                  </div>
-
-                  <div className="space-y-2 text-center">
-                    <h3 className="text-xl font-semibold">{selectedUser.name}</h3>
-                    <p className="text-gray-500">{selectedUser.email}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-medium">Job Role:</h4>
-                    <p>{selectedUser.jobRole}</p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Experience:</h4>
-                    <p>{selectedUser.experience}</p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Education:</h4>
-                    <p>{selectedUser.education}</p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">About Me:</h4>
-                    <p className="text-gray-600">{selectedUser.about}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">AI Generated Fitment Score</h3>
-                  <div className="text-center p-4 border rounded-lg">
-                    <Progress value={selectedUser.score} className="h-2 mb-2" />
-                    <div className="text-3xl font-bold text-blue-600">
-                      {selectedUser.score.toFixed(2)}%
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h4 className="font-medium">Personality Assessment Scores</h4>
-                  {selectedUser.personalityScores && (
-                    <div className="space-y-4">
-                      <PersonalityBar
-                        label="Extroversion Score"
-                        value={selectedUser.personalityScores.extroversion}
-                      />
-                      <PersonalityBar
-                        label="Agreeableness Score"
-                        value={selectedUser.personalityScores.agreeableness}
-                      />
-                      <PersonalityBar
-                        label="Openness Score"
-                        value={selectedUser.personalityScores.openness}
-                      />
-                      <PersonalityBar
-                        label="Neuroticism Score"
-                        value={selectedUser.personalityScores.neuroticism}
-                      />
-                      <PersonalityBar
-                        label="Conscientiousness Score"
-                        value={selectedUser.personalityScores.conscientiousness}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <UserDetailsDialog 
+        isOpen={!!selectedUser} 
+        onClose={() => setSelectedUser(null)}
+        user={selectedUser}
+      />
     </div>
   );
 }

@@ -1,9 +1,8 @@
 
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CandidateDetailsDialog from "./CandidateDetailsDialog";
 
 interface Candidate {
@@ -26,11 +25,33 @@ interface CandidateScoresProps {
 
 export default function CandidateScores({ candidates }: CandidateScoresProps) {
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const navigate = useNavigate();
+  
+  // Function to find the user ID by name (matching with users in the Users page)
+  const getUserIdByName = (name: string): string => {
+    // This is a simple mapping function - in a real app, you'd fetch this from an API
+    const userMap: Record<string, string> = {
+      "Saksham Gupta": "1",
+      "Ayush Thakur": "2",
+      "Adishwar Sharma": "3",
+      "Garima Saigal": "4",
+      "Aarush Wali": "4" // Mapping to existing user ID
+    };
+    
+    return userMap[name] || "1"; // Default to user ID "1" if not found
+  };
+
+  const handleCandidateClick = (candidate: Candidate) => {
+    // Get the user ID for this candidate
+    const userId = getUserIdByName(candidate.name);
+    // Navigate to the Users page with the user ID
+    navigate(`/users?selected=${userId}`);
+  };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg h-full flex flex-col">
+    <div className="bg-white p-6 rounded-lg shadow-lg h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400">
+        <h3 className="text-2xl font-extrabold text-indigo-600">
           Candidate Fitment Scores
         </h3>
         <Button variant="ghost" size="sm" asChild>
@@ -45,13 +66,13 @@ export default function CandidateScores({ candidates }: CandidateScoresProps) {
         {candidates.map((candidate) => (
           <div
             key={candidate.email}
-            className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all cursor-pointer"
-            onClick={() => setSelectedCandidate(candidate)}
+            className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-all cursor-pointer"
+            onClick={() => handleCandidateClick(candidate)}
           >
             <div className="flex justify-between items-center">
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-white">{candidate.name}</h4>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{candidate.email}</p>
+                <h4 className="font-medium text-gray-900">{candidate.name}</h4>
+                <p className="text-sm text-gray-500">{candidate.email}</p>
               </div>
               <div
                 className={`text-lg font-semibold ${
@@ -66,7 +87,7 @@ export default function CandidateScores({ candidates }: CandidateScoresProps) {
 
             {/* Green Bar under candidates with score greater than 60% */}
             {candidate.fitmentScore >= 60 && (
-              <div className="mt-2 w-full bg-green-100 rounded-full h-2.5 dark:bg-green-600">
+              <div className="mt-2 w-full bg-green-100 rounded-full h-2.5">
                 <div
                   className="h-2.5 rounded-full bg-green-500"
                   style={{ width: `${candidate.fitmentScore}%` }}
@@ -76,7 +97,7 @@ export default function CandidateScores({ candidates }: CandidateScoresProps) {
 
             {/* Yellow Bar under candidates with score less than 60% */}
             {candidate.fitmentScore < 60 && (
-              <div className="mt-2 w-full bg-yellow-100 rounded-full h-2.5 dark:bg-yellow-600">
+              <div className="mt-2 w-full bg-yellow-100 rounded-full h-2.5">
                 <div
                   className="h-2.5 rounded-full bg-yellow-500"
                   style={{ width: `${candidate.fitmentScore}%` }}

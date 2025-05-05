@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import type { UserProfile } from "@/hooks/useUsers";
+import PersonalityPieChart from "./PersonalityPieChart";
 
 interface UserDetailsDialogProps {
   isOpen: boolean;
@@ -35,7 +36,11 @@ export default function UserDetailsDialog({ isOpen, onClose, user }: UserDetails
           <div className="space-y-6">
             <div className="space-y-4">
               <div className="aspect-square w-full max-w-[300px] mx-auto bg-gray-100 rounded-lg flex items-center justify-center">
-                <span className="text-gray-400">Profile Image</span>
+                {user.profileImage ? (
+                  <img src={user.profileImage} alt="Profile" className="w-full h-full object-cover rounded-lg" />
+                ) : (
+                  <span className="text-gray-400">Profile Image</span>
+                )}
               </div>
               
               <div className="space-y-2">
@@ -78,45 +83,12 @@ export default function UserDetailsDialog({ isOpen, onClose, user }: UserDetails
             {user.personalityScores && (
               <div className="space-y-4">
                 <h4 className="font-medium">Personality Assessment</h4>
-                <div className="space-y-4">
-                  <ScoreItem 
-                    label="Extroversion Score" 
-                    value={user.personalityScores.extroversion} 
-                  />
-                  <ScoreItem 
-                    label="Agreeableness Score" 
-                    value={user.personalityScores.agreeableness} 
-                  />
-                  <ScoreItem 
-                    label="Openness Score" 
-                    value={user.personalityScores.openness} 
-                  />
-                  <ScoreItem 
-                    label="Neuroticism Score" 
-                    value={user.personalityScores.neuroticism} 
-                  />
-                  <ScoreItem 
-                    label="Conscientiousness Score" 
-                    value={user.personalityScores.conscientiousness} 
-                  />
-                </div>
+                <PersonalityPieChart scores={user.personalityScores} />
               </div>
             )}
           </div>
         </div>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function ScoreItem({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="space-y-2">
-      <div className="flex justify-between text-sm">
-        <span>{label}</span>
-        <span>{value}%</span>
-      </div>
-      <Progress value={value} className="h-2" />
-    </div>
   );
 }
