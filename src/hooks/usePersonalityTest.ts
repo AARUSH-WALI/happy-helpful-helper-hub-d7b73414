@@ -21,8 +21,30 @@ export type TestResults = {
 };
 
 export type InviteParams = {
-  email: string;
+  email?: string;
+  emailText?: string;
   name: string;
+};
+
+// Helper function to extract email from text or hyperlink
+const extractEmail = (text: string): string | null => {
+  // Check if it's a hyperlink with mailto:
+  const mailtoRegex = /mailto:([^"'?]+)/i;
+  const mailtoMatch = text.match(mailtoRegex);
+  
+  if (mailtoMatch && mailtoMatch[1]) {
+    return mailtoMatch[1];
+  }
+  
+  // Regular expression for matching email addresses in text
+  const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
+  const emailMatch = text.match(emailRegex);
+  
+  if (emailMatch && emailMatch.length > 0) {
+    return emailMatch[0];
+  }
+  
+  return null;
 };
 
 export function usePersonalityTest() {
@@ -77,7 +99,7 @@ export function usePersonalityTest() {
     }
   };
 
-  const sendTestInvite = async ({ email, name }: InviteParams) => {
+  const sendTestInvite = async ({ email, emailText, name }: InviteParams) => {
     try {
       setIsSending(true);
       
@@ -85,10 +107,26 @@ export function usePersonalityTest() {
       const baseUrl = window.location.origin; 
       const personalityTestUrl = `${baseUrl}/personality-test`;
       
+      // If emailText is provided, try to extract email from it
+      let candidateEmail = email;
+      if (emailText && !email) {
+        const extractedEmail = extractEmail(emailText);
+        if (extractedEmail) {
+          candidateEmail = extractedEmail;
+        } else {
+          throw new Error("Could not extract a valid email address");
+        }
+      }
+      
+      if (!candidateEmail) {
+        throw new Error("No valid email provided");
+      }
+      
       // Send invitation via edge function
       const { data, error } = await supabase.functions.invoke('send-personality-test-invite', {
         body: {
-          email,
+          email: candidateEmail,
+          emailText,
           name,
           personalityTestUrl
         }
@@ -101,7 +139,7 @@ export function usePersonalityTest() {
       // Show success message
       toast({
         title: "Invitation sent",
-        description: `A personality test invitation has been sent to ${email}.`,
+        description: `A personality test invitation has been sent to ${candidateEmail}.`,
       });
       
       sonnerToast.success("Invitation sent successfully");

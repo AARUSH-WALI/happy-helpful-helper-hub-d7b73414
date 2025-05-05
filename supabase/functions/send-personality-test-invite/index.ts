@@ -13,10 +13,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// SMTP Configuration
+// SMTP Configuration for personal email
 const smtpClient = new SMTPClient({
-  user: Deno.env.get("SMTP_USER")!,
-  password: Deno.env.get("SMTP_PASSWORD")!,
+  user: Deno.env.get("PERSONAL_EMAIL")!,
+  password: Deno.env.get("PERSONAL_EMAIL_PASSWORD")!,
   host: Deno.env.get("SMTP_HOST")!,
   port: parseInt(Deno.env.get("SMTP_PORT") || "587"),
   ssl: Deno.env.get("SMTP_SSL") === "true",
@@ -26,6 +26,21 @@ const smtpClient = new SMTPClient({
 // Function to generate a secure random token
 function generateToken() {
   return crypto.randomUUID();
+}
+
+// Function to extract email from a string (including hyperlinks)
+function extractEmail(text: string): string | null {
+  // Regular expression for matching email addresses
+  const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
+  
+  // Try to find an email in the text
+  const match = text.match(emailRegex);
+  
+  if (match && match.length > 0) {
+    return match[0];
+  }
+  
+  return null;
 }
 
 Deno.serve(async (req) => {
@@ -38,6 +53,7 @@ Deno.serve(async (req) => {
     const { 
       resumeId, 
       email, 
+      emailText,
       name, 
       personalityTestUrl = 'http://localhost:5173/personality-test',
       testResults
@@ -136,6 +152,19 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Extract email from hyperlink or text if provided
+    let candidateEmail = email;
+    if (emailText) {
+      const extractedEmail = extractEmail(emailText);
+      if (extractedEmail) {
+        candidateEmail = extractedEmail;
+      }
+    }
+    
+    if (!candidateEmail) {
+      throw new Error("No valid email found");
+    }
+
     // Generate unique token for new invitation
     const token = generateToken();
 
@@ -143,7 +172,7 @@ Deno.serve(async (req) => {
     const { data, error: insertError } = await supabase
       .from('personality_test_invitations')
       .insert({
-        candidate_email: email,
+        candidate_email: candidateEmail,
         token,
         is_completed: false
       })
@@ -155,10 +184,10 @@ Deno.serve(async (req) => {
     // Construct invitation link - use absolute URL with token
     const invitationLink = `${personalityTestUrl}?token=${token}`;
 
-    // Send email using SMTP
+    // Send email using SMTP from personal email
     const message = {
-      from: `Candidate Assessment <${Deno.env.get("SMTP_FROM_EMAIL")}>`,
-      to: email,
+      from: Deno.env.get("PERSONAL_EMAIL")!,
+      to: candidateEmail,
       subject: 'Complete Your Personality Assessment',
       text: `Hello ${name},
       
@@ -183,7 +212,7 @@ The Hiring Team`,
 
     try {
       await smtpClient.sendAsync(message);
-      console.log("Email sent successfully to:", email);
+      console.log("Email sent successfully to:", candidateEmail);
     } catch (emailError) {
       console.error("Email sending error:", emailError);
       throw emailError;

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Upload, FileText, File as FileIcon, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -83,6 +82,27 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
       default:
         return <FileIcon size={40} />;
     }
+  };
+
+  // Function to extract email from text or hyperlinks
+  const extractEmailFromText = (text: string): string | null => {
+    // Check for mailto: links first
+    const mailtoRegex = /mailto:([^"'?]+)/i;
+    const mailtoMatch = text.match(mailtoRegex);
+    
+    if (mailtoMatch && mailtoMatch[1]) {
+      return mailtoMatch[1];
+    }
+    
+    // Regular expression for matching email addresses
+    const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
+    const matches = text.match(emailRegex);
+    
+    if (matches && matches.length > 0) {
+      return matches[0];
+    }
+    
+    return null;
   };
 
   const parseResume = async () => {
@@ -243,6 +263,14 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
             projects: parsedResumeData.Projects || [],
             bestFitFor: parsedResumeData.Best_Fit_For || ""
           };
+          
+          // Ensure we have an email - try to extract from raw content if not found
+          if (!mappedData.personalInfo.email || mappedData.personalInfo.email.trim() === "") {
+            const extractedEmail = extractEmailFromText(parsedContent);
+            if (extractedEmail) {
+              mappedData.personalInfo.email = extractedEmail;
+            }
+          }
 
           // Store resume data in Supabase
           const { data: resumeData, error: insertError } = await supabase
@@ -280,24 +308,26 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
             throw insertError;
           }
 
-          // Try to send personality test invitation email
-          try {
-            const { error: inviteError } = await supabase.functions.invoke('send-personality-test-invite', {
-              body: {
-                resumeId: resumeData.id,
-                email: mappedData.personalInfo.email,
-                name: mappedData.personalInfo.name,
-                personalityTestUrl: 'http://localhost:5173/' // Replace with your actual URL
-              }
-            });
+          // Try to send personality test invitation using the extracted email
+          if (mappedData.personalInfo.email) {
+            try {
+              const { error: inviteError } = await supabase.functions.invoke('send-personality-test-invite', {
+                body: {
+                  resumeId: resumeData.id,
+                  email: mappedData.personalInfo.email,
+                  name: mappedData.personalInfo.name,
+                  personalityTestUrl: `${window.location.origin}/personality-test`
+                }
+              });
 
-            if (inviteError) {
-              console.error("Error sending invitation:", inviteError);
-              // Don't throw here, we want to continue even if email fails
+              if (inviteError) {
+                console.error("Error sending invitation:", inviteError);
+                // Don't throw here, we want to continue even if email fails
+              }
+            } catch (emailError) {
+              console.error("Failed to send email:", emailError);
+              // Continue processing even if email sending fails
             }
-          } catch (emailError) {
-            console.error("Failed to send email:", emailError);
-            // Continue processing even if email sending fails
           }
 
           // Clear progress interval and set to 100%
@@ -351,23 +381,48 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
     });
   };
 
+  // Function to attempt to send personality test invite using various email extraction methods
   const sendPersonalityTestInvite = async (parsedResumeData: ResumeData) => {
     try {
+      // First try to use the email from the parsed data
+      let candidateEmail = parsedResumeData.personalInfo.email;
+      
+      // If no email was found, try to extract from other fields
+      if (!candidateEmail) {
+        // Try from summary
+        if (parsedResumeData.personalInfo.summary) {
+          const extractedEmail = extractEmailFromText(parsedResumeData.personalInfo.summary);
+          if (extractedEmail) candidateEmail = extractedEmail;
+        }
+        
+        // If still no email, try from other text fields
+        if (!candidateEmail) {
+          const allText = JSON.stringify(parsedResumeData);
+          const extractedEmail = extractEmailFromText(allText);
+          if (extractedEmail) candidateEmail = extractedEmail;
+        }
+      }
+      
+      if (!candidateEmail) {
+        console.error("No email could be extracted from the resume");
+        return;
+      }
+      
       const { data, error } = await supabase
         .from('candidate_resume')
         .select('id')
-        .eq('best_fit_for', parsedResumeData.bestFitFor)
+        .eq('email', candidateEmail)
         .single();
 
       if (error) throw error;
 
       await supabase.functions.invoke('send-personality-test-invite', {
-        body: JSON.stringify({
+        body: {
           resumeId: data.id,
-          email: parsedResumeData.personalInfo.email,
+          email: candidateEmail,
           name: parsedResumeData.personalInfo.name,
-          personalityTestUrl: 'http://localhost:5173/' // Replace with your actual URL
-        })
+          personalityTestUrl: `${window.location.origin}/personality-test`
+        }
       });
     } catch (error) {
       console.error('Failed to send personality test invite:', error);
