@@ -1,6 +1,6 @@
 
 import React from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 interface CandidateStatusProps {
   approvedCount: number;
@@ -18,8 +18,6 @@ export default function CandidateStatus({
     { name: "Under Review", value: reviewCount, color: "#4da3ff" },
     { name: "Rejected", value: rejectedCount, color: "#ff6b6b" },
   ];
-
-  const COLORS = ["#9b87f5", "#4da3ff", "#ff6b6b"];
   
   const RADIAN = Math.PI / 180;
   const renderCustomizedLabel = ({
@@ -42,6 +40,7 @@ export default function CandidateStatus({
         textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
         fontSize={12}
+        fontWeight="bold"
       >
         {`${(percent * 100).toFixed(0)}%`}
       </text>
@@ -49,11 +48,11 @@ export default function CandidateStatus({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
-      <div className="p-6 border-b border-gray-200">
-        <h2 className="text-2xl font-bold text-gray-800">Candidate Status</h2>
+    <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+      <div className="p-5 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-white">
+        <h2 className="text-xl font-bold text-gray-800">Candidate Status</h2>
       </div>
-      <div className="p-6">
+      <div className="p-5">
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -72,42 +71,41 @@ export default function CandidateStatus({
                 {data.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
+                    fill={entry.color}
                   />
                 ))}
               </Pie>
+              <Tooltip 
+                formatter={(value: number) => [`${value}`, 'Count']}
+                contentStyle={{ borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+              />
+              <Legend verticalAlign="bottom" align="center" />
             </PieChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-4 mt-4">
+        <div className="flex flex-wrap justify-center gap-6 mt-4">
           <div className="text-center">
-            <div className="text-4xl font-bold text-purple-400">{approvedCount}</div>
+            <div className="text-3xl font-bold text-purple-500">{approvedCount}</div>
             <div className="text-gray-600">Approved</div>
           </div>
           <div className="text-center">
-            <div className="text-4xl font-bold text-blue-400">{reviewCount}</div>
+            <div className="text-3xl font-bold text-blue-500">{reviewCount}</div>
             <div className="text-gray-600">Under Review</div>
           </div>
           <div className="text-center">
-            <div className="text-4xl font-bold text-red-400">{rejectedCount}</div>
+            <div className="text-3xl font-bold text-red-500">{rejectedCount}</div>
             <div className="text-gray-600">Rejected</div>
           </div>
         </div>
 
-        <div className="space-y-2 mt-6">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-purple-400"></div>
-            <span className="text-sm text-gray-700">Approved</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-400"></div>
-            <span className="text-sm text-gray-700">Under Review</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-400"></div>
-            <span className="text-sm text-gray-700">Rejected</span>
-          </div>
+        <div className="flex flex-wrap gap-4 mt-6 justify-center">
+          {data.map((item) => (
+            <div key={item.name} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+              <span className="text-sm text-gray-700 font-medium">{item.name}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -1,9 +1,8 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
+import { SMTPClient } from "npm:emailjs@4.0.3";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -13,6 +12,16 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// SMTP Configuration
+const smtpClient = new SMTPClient({
+  user: Deno.env.get("SMTP_USER")!,
+  password: Deno.env.get("SMTP_PASSWORD")!,
+  host: Deno.env.get("SMTP_HOST")!,
+  port: parseInt(Deno.env.get("SMTP_PORT") || "587"),
+  ssl: Deno.env.get("SMTP_SSL") === "true",
+  tls: Deno.env.get("SMTP_TLS") === "true" || true,
+});
 
 // Function to generate a secure random token
 function generateToken() {
@@ -146,11 +155,22 @@ Deno.serve(async (req) => {
     // Construct invitation link - use absolute URL with token
     const invitationLink = `${personalityTestUrl}?token=${token}`;
 
-    // Send email using Resend's default domain (onboarding@resend.dev)
-    const { error: emailError } = await resend.emails.send({
-      from: 'Candidate Assessment <onboarding@resend.dev>',
+    // Send email using SMTP
+    const message = {
+      from: `Candidate Assessment <${Deno.env.get("SMTP_FROM_EMAIL")}>`,
       to: email,
       subject: 'Complete Your Personality Assessment',
+      text: `Hello ${name},
+      
+We invite you to complete a brief personality assessment (Big Five) as part of your job application process.
+
+Please click the link below to start the test:
+${invitationLink}
+
+This link is unique to you and will expire in 48 hours.
+
+Best regards,
+The Hiring Team`,
       html: `
         <h1>Hello ${name},</h1>
         <p>We invite you to complete a brief personality assessment (Big Five) as part of your job application process.</p>
@@ -159,14 +179,15 @@ Deno.serve(async (req) => {
         <p>This link is unique to you and will expire in 48 hours.</p>
         <p>Best regards,<br>The Hiring Team</p>
       `
-    });
+    };
 
-    if (emailError) {
+    try {
+      await smtpClient.sendAsync(message);
+      console.log("Email sent successfully to:", email);
+    } catch (emailError) {
       console.error("Email sending error:", emailError);
       throw emailError;
     }
-
-    console.log("Email sent successfully to:", email);
 
     return new Response(JSON.stringify({ 
       message: 'Invitation sent successfully', 

@@ -66,13 +66,13 @@ export default function RecentActivity() {
   const getStatusBadgeClasses = (status: CandidateActivityStatus) => {
     switch (status) {
       case "Approved":
-        return "bg-green-100 text-green-700 border-green-300";
+        return "bg-green-100 text-green-600 border-green-300";
       case "Reviewing":
-        return "bg-yellow-100 text-yellow-700 border-yellow-300";
+        return "bg-purple-100 text-purple-600 border-purple-300";
       case "Rejected":
-        return "bg-red-100 text-red-700 border-red-300";
+        return "bg-red-100 text-red-600 border-red-300";
       default:
-        return "bg-gray-100 text-gray-700 border-gray-300";
+        return "bg-gray-100 text-gray-600 border-gray-200";
     }
   };
 
@@ -88,10 +88,10 @@ export default function RecentActivity() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
-      <div className="p-6 flex justify-between items-center border-b border-gray-200">
-        <h2 className="text-2xl font-bold text-gray-800">Recent Activity</h2>
-        <button className="text-purple-600 hover:text-purple-800 text-sm">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+      <div className="p-5 flex justify-between items-center border-b border-gray-200 bg-gradient-to-r from-purple-50 to-white">
+        <h2 className="text-xl font-bold text-gray-800">Recent Activity</h2>
+        <button className="text-purple-600 hover:text-purple-800 text-sm font-medium">
           View All
         </button>
       </div>

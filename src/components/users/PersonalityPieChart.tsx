@@ -41,20 +41,20 @@ export default function PersonalityPieChart({ scores }: PersonalityPieChartProps
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => `${value}%`} />
+          <Tooltip formatter={(value) => `${value}%`} contentStyle={{ borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
           <Legend />
         </PieChart>
       </ResponsiveContainer>
       
       {/* Color legend below the chart */}
-      <div className="grid grid-cols-2 gap-2 mt-4">
+      <div className="grid grid-cols-2 gap-4 mt-4">
         {data.map((item) => (
-          <div key={item.name} className="flex items-center gap-2">
+          <div key={item.name} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50">
             <span 
               className="inline-block w-4 h-4 rounded-full" 
               style={{ backgroundColor: item.color }}
             ></span>
-            <span className="text-sm">{item.name}: {item.value}%</span>
+            <span className="text-sm font-medium">{item.name}: {item.value}%</span>
           </div>
         ))}
       </div>

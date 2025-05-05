@@ -62,13 +62,15 @@ export default function Sidebar() {
   return (
     <div className={cn(
       "bg-white border-r border-gray-200 h-screen flex flex-col",
-      isCollapsed ? "w-16" : "w-56"
+      isCollapsed ? "w-20" : "w-56"
     )}>
       <div className={cn(
         "p-4 border-b border-gray-200 flex items-center",
         isCollapsed ? "justify-center" : "justify-between"
       )}>
-        {!isCollapsed && (
+        {isCollapsed ? (
+          <div className="text-xl font-bold text-purple-800">P.ai</div>
+        ) : (
           <div className="text-2xl font-bold text-purple-800">people.ai</div>
         )}
         <button 
@@ -95,12 +97,14 @@ export default function Sidebar() {
                 className={cn(
                   "flex items-center px-4 py-2 text-sm font-medium rounded-md",
                   isActive(item.path)
-                    ? "bg-purple/10 text-purple"
+                    ? "bg-purple-100 text-purple-800"
                     : "text-gray-600 hover:bg-gray-100"
                 )}
+                title={isCollapsed ? item.name : ""}
               >
-                <item.icon size={20} className="mr-3" />
+                <item.icon size={20} className={isCollapsed ? "mx-auto" : "mr-3"} />
                 {!isCollapsed && <span>{item.name}</span>}
+                {isCollapsed && <span className="sr-only">{item.name}</span>}
               </Link>
             ))}
           </nav>
@@ -112,6 +116,9 @@ export default function Sidebar() {
               Utilities
             </h2>
           )}
+          {isCollapsed && (
+            <div className="h-px bg-gray-200 my-2 mx-auto w-2/3"></div>
+          )}
           
           <nav className="space-y-1">
             {menuItems.slice(1).map((item) => (
@@ -121,12 +128,14 @@ export default function Sidebar() {
                 className={cn(
                   "flex items-center px-4 py-2 text-sm font-medium rounded-md",
                   isActive(item.path)
-                    ? "bg-purple/10 text-purple"
+                    ? "bg-purple-100 text-purple-800"
                     : "text-gray-600 hover:bg-gray-100"
                 )}
+                title={isCollapsed ? item.name : ""}
               >
-                <item.icon size={20} className="mr-3" />
+                <item.icon size={20} className={isCollapsed ? "mx-auto" : "mr-3"} />
                 {!isCollapsed && <span>{item.name}</span>}
+                {isCollapsed && <span className="sr-only">{item.name}</span>}
               </Link>
             ))}
           </nav>
