@@ -69,7 +69,7 @@ export default function Sidebar() {
         isCollapsed ? "justify-center" : "justify-between"
       )}>
         {isCollapsed ? (
-          <div className="text-xl font-bold text-purple-800">P.ai</div>
+          <div className="text-xs font-bold text-purple-800">people.ai</div>
         ) : (
           <div className="text-2xl font-bold text-purple-800">people.ai</div>
         )}
