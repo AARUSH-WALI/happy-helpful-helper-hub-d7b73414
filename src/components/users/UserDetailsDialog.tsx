@@ -69,7 +69,7 @@ export default function UserDetailsDialog({ isOpen, onClose, user }: UserDetails
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div>
               <h3 className="text-lg font-semibold mb-4">AI Generated Fitment Score</h3>
               <div className="text-center p-4 border rounded-lg">
