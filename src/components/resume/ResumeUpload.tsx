@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Upload, FileText, File as FileIcon, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -194,6 +195,16 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
 
         const data = await response.json();
         
+        // Check for API quota errors
+        if (data.error && data.error.message && data.error.message.includes("quota")) {
+          clearInterval(interval);
+          setError("API quota exceeded. Please try again later or contact support for assistance.");
+          setUploading(false);
+          onParsingStateChange(false);
+          console.error("API quota error:", data.error);
+          return;
+        }
+        
         if (data.error) {
           throw new Error(data.error.message || "Failed to parse resume");
         }
@@ -349,19 +360,132 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
           console.error("Raw JSON text:", jsonText);
           throw new Error("Invalid JSON response from API");
         }
-      } catch (error) {
+      } catch (error: any) {
         clearInterval(interval);
-        setError("Failed to process resume. Please try again.");
+        
+        // Provide more specific error messages based on error type
+        if (error.message && error.message.includes("quota")) {
+          setError("API quota exceeded. Please try again later or contact support for assistance.");
+        } else {
+          setError("Failed to process resume. Please try again.");
+        }
+        
         setUploading(false);
         onParsingStateChange(false);
         console.error("Error parsing resume:", error);
       }
-    } catch (error) {
-      setError("Failed to process resume. Please try again.");
+    } catch (error: any) {
+      // Handle top-level errors
+      let errorMessage = "Failed to process resume. Please try again.";
+      
+      if (error.message && error.message.includes("quota")) {
+        errorMessage = "API quota exceeded. Please try again later or contact support for assistance.";
+      } else if (error.message && error.message.includes("network")) {
+        errorMessage = "Network error. Please check your internet connection and try again.";
+      }
+      
+      setError(errorMessage);
       setUploading(false);
       onParsingStateChange(false);
       console.error("Error parsing resume:", error);
     }
+  };
+
+  // Function to simulate parsing without using the API
+  const useDemoData = () => {
+    if (!file) return;
+    
+    setUploading(true);
+    onParsingStateChange(true);
+    setError(null);
+    
+    // Start progress indication
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 90) {
+          clearInterval(interval);
+          return 90;
+        }
+        return prev + 10;
+      });
+    }, 300);
+    
+    // Use timeout to simulate API call
+    setTimeout(() => {
+      // Sample data for demo purposes
+      const demoData: ResumeData = {
+        personalInfo: {
+          name: "John Smith",
+          email: "john.smith@example.com",
+          phone: "+1 (555) 123-4567",
+          address: "123 Main St, New York, NY 10001",
+          summary: "Experienced software developer with 5+ years in web development."
+        },
+        education: [
+          {
+            institution: "Stanford University",
+            degree: "Bachelor of Science",
+            field: "Computer Science",
+            startDate: "2015",
+            endDate: "2019",
+            gpa: "3.8"
+          }
+        ],
+        experience: [
+          {
+            company: "Tech Solutions Inc.",
+            position: "Senior Developer",
+            startDate: "2019",
+            endDate: "Present",
+            description: "Led development of web applications using React and Node.js.",
+            location: "San Francisco, CA"
+          },
+          {
+            company: "Digital Innovations",
+            position: "Junior Developer",
+            startDate: "2017",
+            endDate: "2019",
+            description: "Developed and maintained client websites.",
+            location: "San Jose, CA"
+          }
+        ],
+        skills: ["JavaScript", "React", "Node.js", "TypeScript", "HTML", "CSS", "Git"],
+        ugInstitute: "Stanford University",
+        pgInstitute: "",
+        phdInstitute: 0,
+        longevityYears: 5,
+        numberOfJobs: 2,
+        averageExperience: 2.5,
+        skillsCount: 7,
+        achievementsCount: 2,
+        achievements: ["Employee of the Year 2021", "Led team to successful project completion"],
+        trainingsCount: 1,
+        trainings: ["Advanced React Patterns"],
+        workshopsCount: 2,
+        workshops: ["Web Accessibility", "Performance Optimization"],
+        researchPapers: [],
+        patents: [],
+        books: [],
+        isJK: 0,
+        projectsCount: 3,
+        projects: ["E-commerce Platform", "Healthcare Portal", "Mobile Banking App"],
+        bestFitFor: "Full Stack Developer"
+      };
+      
+      clearInterval(interval);
+      setProgress(100);
+      
+      // Notify user and return data
+      setTimeout(() => {
+        toast({
+          title: "Demo Data Loaded",
+          description: "Sample resume data has been loaded for demonstration.",
+        });
+        onResumeUploaded(demoData, file);
+        setUploading(false);
+        onParsingStateChange(false);
+      }, 500);
+    }, 2000);
   };
 
   const readFileAsBase64 = (file: File): Promise<string> => {
@@ -379,54 +503,6 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-  };
-
-  // Function to attempt to send personality test invite using various email extraction methods
-  const sendPersonalityTestInvite = async (parsedResumeData: ResumeData) => {
-    try {
-      // First try to use the email from the parsed data
-      let candidateEmail = parsedResumeData.personalInfo.email;
-      
-      // If no email was found, try to extract from other fields
-      if (!candidateEmail) {
-        // Try from summary
-        if (parsedResumeData.personalInfo.summary) {
-          const extractedEmail = extractEmailFromText(parsedResumeData.personalInfo.summary);
-          if (extractedEmail) candidateEmail = extractedEmail;
-        }
-        
-        // If still no email, try from other text fields
-        if (!candidateEmail) {
-          const allText = JSON.stringify(parsedResumeData);
-          const extractedEmail = extractEmailFromText(allText);
-          if (extractedEmail) candidateEmail = extractedEmail;
-        }
-      }
-      
-      if (!candidateEmail) {
-        console.error("No email could be extracted from the resume");
-        return;
-      }
-      
-      const { data, error } = await supabase
-        .from('candidate_resume')
-        .select('id')
-        .eq('email', candidateEmail)
-        .single();
-
-      if (error) throw error;
-
-      await supabase.functions.invoke('send-personality-test-invite', {
-        body: {
-          resumeId: data.id,
-          email: candidateEmail,
-          name: parsedResumeData.personalInfo.name,
-          personalityTestUrl: `${window.location.origin}/personality-test`
-        }
-      });
-    } catch (error) {
-      console.error('Failed to send personality test invite:', error);
-    }
   };
 
   return (
@@ -478,7 +554,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
       )}
       
       {file && !uploading && (
-        <div className="mt-6 flex gap-4">
+        <div className="mt-6 flex gap-4 flex-wrap justify-center">
           <Button 
             variant="outline" 
             onClick={() => { setFile(null); setError(null); }}
@@ -490,6 +566,14 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
             className="bg-purple-600 hover:bg-purple-700 text-white"
           >
             Parse Resume
+          </Button>
+          {/* Added a demo button option for when the API quota is exceeded */}
+          <Button
+            variant="secondary"
+            onClick={useDemoData}
+            className="bg-purple-100 hover:bg-purple-200 text-purple-800"
+          >
+            Use Demo Data
           </Button>
         </div>
       )}
