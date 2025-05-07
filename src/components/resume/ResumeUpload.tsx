@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Upload, FileText, File as FileIcon, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,8 +19,8 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  // Note: In production, this key should be stored securely on your backend
-  const GEMINI_API_KEY = "AIzaSyAUyQ3aCQujGFpfE-2vPtOzIXJaeM15e00";
+  // Updated Gemini API key
+  const GEMINI_API_KEY = "AIzaSyDLqQIkD6ChVjB-9xzSyGjm0IaoYd_SQbA";
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
