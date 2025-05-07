@@ -127,8 +127,8 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
       // Convert file to base64 for sending to Gemini API
       const fileBase64 = await readFileAsBase64(file);
       
-      // Use Gemini 1.5 Pro for better document processing (like in your Flask app)
-      const geminiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
+      // Use Gemini 1.5 Pro for better document processing
+      const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
       
       // Craft a prompt that will work well for resume parsing
       const prompt = `
@@ -168,8 +168,10 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
       `;
       
       try {
-        // Make the actual API call to Gemini
-        const response = await fetch(`${geminiEndpoint}?key=${GEMINI_API_KEY}`, {
+        console.log("Making API request to:", geminiEndpoint);
+        
+        // Make the actual API call to Gemini - FIXED: Removed the ?key= from the URL since it's now in the endpoint
+        const response = await fetch(geminiEndpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -205,6 +207,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
         }
         
         if (data.error) {
+          console.error("API error details:", data.error);
           throw new Error(data.error.message || "Failed to parse resume");
         }
         
@@ -366,7 +369,8 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
         if (error.message && error.message.includes("quota")) {
           setError("API quota exceeded. Please try again later or contact support for assistance.");
         } else {
-          setError("Failed to process resume. Please try again.");
+          console.error("Detailed error:", error);
+          setError("Failed to process resume. Please try again or use the Demo Data option.");
         }
         
         setUploading(false);
@@ -383,6 +387,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
         errorMessage = "Network error. Please check your internet connection and try again.";
       }
       
+      console.error("Top-level error details:", error);
       setError(errorMessage);
       setUploading(false);
       onParsingStateChange(false);
