@@ -20,7 +20,7 @@ export default function ResumeUpload({ onResumeUploaded, onParsingStateChange }:
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   // Updated Gemini API key
-  const GEMINI_API_KEY = "AIzaSyDLqQIkD6ChVjB-9xzSyGjm0IaoYd_SQbA";
+  const GEMINI_API_KEY = "AIzaSyCBOk69oj5NqbIFE3AE-ecDwbmtExMl-FE";
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
