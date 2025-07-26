@@ -12,27 +12,18 @@ import cooksyLogo from "@/assets/cooksy-logo.png";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-
-interface Message {
-  id: string;
-  content: string;
-  isUser: boolean;
-  timestamp: Date;
-}
+import { useChat } from "@/hooks/useChat";
 
 const Chat = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { messages, isLoading, sendMessage, speechToText, createSession, loadSession, getSessions } = useChat();
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isListeningForWakeWord, setIsListeningForWakeWord] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [currentRecipeStep, setCurrentRecipeStep] = useState(0);
-  const [isInRecipeMode, setIsInRecipeMode] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [hasStartedConversation, setHasStartedConversation] = useState(false);
   const [isWakeWordAnimating, setIsWakeWordAnimating] = useState(false);
@@ -43,7 +34,6 @@ const Chat = () => {
   const recognitionRef = useRef<any>(null);
   const wakeWordRecognitionRef = useRef<any>(null);
   const speechTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const conversationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const handleLogout = () => {
@@ -74,21 +64,6 @@ const Chat = () => {
     
     return () => clearTimeout(timer);
   }, [isVoiceMode]);
-
-  const isCookingRelated = (message: string): boolean => {
-    const cookingKeywords = [
-      'recipe', 'cook', 'cooking', 'kitchen', 'ingredient', 'food', 'dish', 'meal',
-      'bake', 'baking', 'fry', 'boil', 'roast', 'grill', 'steam', 'sauté',
-      'spice', 'seasoning', 'flavor', 'taste', 'chef', 'cuisine', 'menu',
-      'breakfast', 'lunch', 'dinner', 'snack', 'appetizer', 'dessert',
-      'vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'protein', 'carbs',
-      'nutrition', 'calories', 'healthy', 'diet', 'eat', 'eating', 'prepare'
-    ];
-    
-    return cookingKeywords.some(keyword => 
-      message.toLowerCase().includes(keyword)
-    );
-  };
 
   const speakText = (text: string, messageId: string) => {
     try {
@@ -321,9 +296,6 @@ const Chat = () => {
       if (speechTimeoutRef.current) {
         clearTimeout(speechTimeoutRef.current);
       }
-      if (conversationTimeoutRef.current) {
-        clearTimeout(conversationTimeoutRef.current);
-      }
     };
   }, [isRecording, isVoiceMode, isListeningForWakeWord, isSpeaking]);
 
@@ -391,160 +363,35 @@ const Chat = () => {
     }
   };
 
-  const getGeminiResponse = async (userMessage: string): Promise<string> => {
-    try {
-      // Check if the message is cooking-related
-      if (!isCookingRelated(userMessage)) {
-        return "I'm Cooksy, your cooking assistant! I'm here to help you with recipes, cooking techniques, meal planning, and kitchen tips. Could you ask me something related to cooking or food?";
-      }
-
-      // Build conversation context from recent messages
-      const recentMessages = messages.slice(-6); // Last 6 messages for context
-      const conversationContext = recentMessages
-        .map(msg => `${msg.isUser ? 'User' : 'Assistant'}: ${msg.content}`)
-        .join('\n');
-
-      const enhancedPrompt = `You are Cooksy AI, an expert culinary assistant and professional chef with extensive knowledge in:
-
-🍳 COOKING EXPERTISE:
-- International cuisines and traditional recipes
-- Advanced cooking techniques and food science
-- Ingredient substitutions and dietary adaptations
-- Kitchen equipment recommendations and usage
-- Food safety and proper storage methods
-- Meal planning and nutrition optimization
-- Baking science and pastry techniques
-- Wine pairing and beverage recommendations
-
-🎯 RESPONSE STYLE:
-- Provide step-by-step instructions with precise measurements
-- Include cooking times, temperatures, and techniques
-- Suggest ingredient alternatives for dietary restrictions
-- Offer helpful tips and pro chef secrets
-- Be encouraging and enthusiastic about cooking
-- Format recipes clearly with ingredients and instructions
-- Include nutritional benefits when relevant
-${isVoiceMode ? `- Keep responses conversational and suitable for voice interaction
-- For step-by-step recipes, number each step clearly and keep steps concise
-- End with questions like "Ready for the next step?" or "Any questions about this step?"` : ''}
-
-📝 CONVERSATION CONTEXT:
-${conversationContext ? `Previous conversation:\n${conversationContext}\n\n` : ''}
-
-Current question: ${userMessage}
-
-Please provide a detailed, helpful, and engaging response focused on cooking and culinary arts.`;
-
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyDhUzf3y6JkGexIbmY_jwhpTu6BA3FbDYs`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: enhancedPrompt
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.8,
-            topK: 50,
-            topP: 0.9,
-            maxOutputTokens: 2048,
-            candidateCount: 1,
-            stopSequences: ["User:", "Assistant:"]
-          },
-          safetySettings: [
-            {
-              category: "HARM_CATEGORY_HARASSMENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-              category: "HARM_CATEGORY_HATE_SPEECH", 
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            }
-          ]
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        
-        if (response.status === 503) {
-          return "🔄 The AI service is currently experiencing high demand. Please try again in a few moments, or feel free to ask me another cooking question!";
-        } else if (response.status === 429) {
-          return "⏱️ We've hit the rate limit. Please wait a moment before sending another message.";
-        } else if (response.status === 400) {
-          return "❌ There was an issue with your request. Please try rephrasing your question.";
-        } else {
-          console.error('API Error:', errorData);
-          return "🔧 I'm experiencing technical difficulties. Please try again in a moment, and I'll do my best to help with your cooking questions!";
-        }
-      }
-
-      const data = await response.json();
-      return data.candidates[0]?.content?.parts[0]?.text || "I'm sorry, I couldn't generate a response. Please try asking your cooking question again.";
-    } catch (error) {
-      console.error('Error calling Gemini API:', error);
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        return "🌐 Unable to connect to the AI service. Please check your internet connection and try again.";
-      }
-      return "🤖 I'm having trouble processing your request right now. Please try again in a moment, and I'll be happy to help with your cooking questions!";
-    }
-  };
-
   const handleSendMessage = async (messageText?: string, isVoiceInput = false) => {
-    const messageToSend = messageText || inputMessage.trim();
-    if (!messageToSend) return;
+    const message = messageText || inputMessage.trim();
+    if (!message || isLoading) return;
 
-    // Mark conversation as started
     setHasStartedConversation(true);
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: messageToSend,
-      isUser: true,
-      timestamp: new Date(),
-    };
+    // Clear input immediately for better UX
+    if (!isVoiceInput) {
+      setInputMessage("");
+    }
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage("");
-    setIsLoading(true);
-
-    // Get AI response from Gemini
     try {
-      const aiResponseContent = await getGeminiResponse(messageToSend);
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        content: aiResponseContent,
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, aiResponse]);
+      // Send message using the chat hook
+      const aiMessage = await sendMessage(message);
 
-      // For voice mode, auto-speak the response
-      if (isVoiceMode && isVoiceInput) {
-        speakText(aiResponseContent, aiResponse.id);
+      // Read response aloud if voice mode is enabled and we got a response
+      if (isVoiceMode && aiMessage) {
+        setTimeout(() => {
+          speakText(aiMessage.content, aiMessage.id);
+        }, 500);
       }
+
     } catch (error) {
-      console.error('Error getting AI response:', error);
-      const errorResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        content: "I'm sorry, I encountered an error. Please try again.",
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorResponse]);
-    } finally {
-      setIsLoading(false);
+      console.error('Error sending message:', error);
+      toast({
+        title: "Connection Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -698,7 +545,7 @@ Please provide a detailed, helpful, and engaging response focused on cooking and
                     {/* Personalized Greeting */}
                     <div className="space-y-2">
                       <h2 className="text-3xl font-semibold text-primary">
-                        Hello, Saksham Gupta
+                        Hello there!
                       </h2>
                       <p className="text-lg text-muted-foreground">
                         What can I help you cook today?
@@ -754,180 +601,127 @@ Please provide a detailed, helpful, and engaging response focused on cooking and
                 
                 {/* Messages Container */}
                 <div className="flex-1 overflow-y-auto space-y-6 py-6">
-                  {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.isUser ? "justify-end" : "justify-start"} animate-fade-in group`}
-                  >
-                    <div className={`flex items-start space-x-3 max-w-3xl ${message.isUser ? "flex-row-reverse space-x-reverse" : ""} relative`}>
-                      <Avatar className="h-8 w-8 mt-1">
-                        {message.isUser ? (
-                          <AvatarFallback className="bg-gradient-hero text-primary-foreground text-sm font-semibold">
-                            JD
+                  {messages.map((message, index) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.role === 'user' ? "justify-end" : "justify-start"} mb-4`}
+                    >
+                      <div
+                        className={`max-w-[75%] flex items-start space-x-3 ${
+                          message.role === 'user' ? "flex-row-reverse space-x-reverse" : ""
+                        }`}
+                      >
+                        <Avatar className="w-8 h-8 flex-shrink-0">
+                          <AvatarImage 
+                            src={message.role === 'user' ? "/placeholder.svg" : cooksyLogo} 
+                            alt={message.role === 'user' ? "User" : "Cooksy"} 
+                          />
+                          <AvatarFallback className={message.role === 'user' ? "bg-primary text-primary-foreground" : "bg-orange-500 text-white"}>
+                            {message.role === 'user' ? "U" : <ChefHat className="w-4 h-4" />}
                           </AvatarFallback>
-                        ) : (
+                        </Avatar>
+                        <Card className={`${
+                          message.role === 'user'
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-card border-border/50 shadow-sm"
+                        }`}>
+                          <CardContent className="p-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                                  {message.content}
+                                </p>
+                                <p className={`text-xs mt-2 ${
+                                  message.role === 'user'
+                                    ? "text-primary-foreground/70" 
+                                    : "text-muted-foreground"
+                                }`}>
+                                  {message.timestamp.toLocaleTimeString([], { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                  })}
+                                </p>
+                              </div>
+                              <div className="flex gap-1 ml-2">
+                                {message.role === 'assistant' && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className={`h-6 w-6 p-0 ${
+                                        speakingMessageId === message.id
+                                          ? "text-orange-500"
+                                          : "text-muted-foreground hover:text-foreground"
+                                      }`}
+                                      onClick={() => {
+                                        if (speakingMessageId === message.id) {
+                                          stopSpeaking();
+                                        } else {
+                                          speakText(message.content, message.id);
+                                        }
+                                      }}
+                                    >
+                                      {speakingMessageId === message.id ? (
+                                        <VolumeX className="h-3 w-3" />
+                                      ) : (
+                                        <Volume2 className="h-3 w-3" />
+                                      )}
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(message.content);
+                                        setCopiedMessageId(message.id);
+                                        setTimeout(() => setCopiedMessageId(null), 2000);
+                                        toast({
+                                          title: "Copied!",
+                                          description: "Message copied to clipboard",
+                                        });
+                                      }}
+                                    >
+                                      {copiedMessageId === message.id ? (
+                                        <Check className="h-3 w-3" />
+                                      ) : (
+                                        <Copy className="h-3 w-3" />
+                                      )}
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </div>
+                  ))}
+                 
+                  {isLoading && (
+                    <div className="flex justify-start animate-fade-in">
+                      <div className="flex items-start space-x-3 max-w-3xl">
+                        <Avatar className="h-8 w-8 mt-1">
                           <AvatarFallback className="bg-gradient-accent text-accent-foreground">
                             <ChefHat className="h-4 w-4" />
                           </AvatarFallback>
-                        )}
-                      </Avatar>
-                      <Card className={`${
-                        message.isUser 
-                          ? "bg-gradient-hero text-primary-foreground border-primary/20" 
-                          : "bg-background/90 backdrop-blur-md border-border/30 shadow-card hover:shadow-glow"
-                      } transition-all duration-300 relative`}>
-                        <CardContent className="p-4">
-                          <div className={`${!message.isUser ? 'prose prose-sm max-w-none' : ''}`}>
-                            {!message.isUser ? (
-                              <div className="space-y-3">
-                                <div className="flex items-center space-x-2 mb-3">
-                                  <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-                                  <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
-                                    Cooksy AI
-                                  </span>
-                                </div>
-                                 <div className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
-                                   {message.content.replace(/\*\*/g, '').replace(/^\s+/gm, '').split('\n').map((line, index) => {
-                                     // Remove any extra spaces and clean up formatting
-                                     const cleanLine = line.trim().replace(/^\*+\s*/, '').replace(/^\#+\s*/, '');
-                                     
-                                     if (!cleanLine) {
-                                       return <br key={index} />;
-                                     }
-                                     
-                                     // Recipe titles or section headers
-                                     if (cleanLine.includes('RECIPE') || cleanLine.includes('INGREDIENTS') || cleanLine.includes('INSTRUCTIONS')) {
-                                       return (
-                                         <h3 key={index} className="font-bold text-primary mt-4 mb-2 text-base">
-                                           {cleanLine}
-                                         </h3>
-                                       );
-                                     }
-                                     
-                                     // Special sections with emojis
-                                     if (cleanLine.match(/^[🍳🎯📝🥘🔥⏰]/)) {
-                                       return (
-                                         <div key={index} className="bg-accent/20 p-3 rounded-lg my-3 border-l-4 border-primary">
-                                           <p className="font-medium text-foreground">{cleanLine}</p>
-                                         </div>
-                                       );
-                                     }
-                                     
-                                     // List items
-                                     if (cleanLine.match(/^[-•]\s/)) {
-                                       return (
-                                         <li key={index} className="ml-4 text-foreground my-1">
-                                           {cleanLine.replace(/^[-•]\s*/, '')}
-                                         </li>
-                                       );
-                                     }
-                                     
-                                     // Numbered list items
-                                     if (cleanLine.match(/^\d+\.\s/)) {
-                                       return (
-                                         <div key={index} className="flex items-start space-x-2 my-2">
-                                           <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                                             {cleanLine.match(/^(\d+)/)?.[1]}
-                                           </span>
-                                           <p className="text-foreground flex-1">
-                                             {cleanLine.replace(/^\d+\.\s*/, '')}
-                                           </p>
-                                         </div>
-                                       );
-                                     }
-                                     
-                                     // Regular paragraphs
-                                     return (
-                                       <p key={index} className="text-foreground my-2 leading-relaxed">
-                                         {cleanLine}
-                                       </p>
-                                     );
-                                   })}
-                                  </div>
-                                  
-                                  {/* Read Aloud Button for AI messages */}
-                                  <div className="flex items-center space-x-2 mt-3 pt-3 border-t border-border/20">
-                                    <Button
-                                      onClick={() => speakText(message.content, message.id)}
-                                      disabled={isSpeaking && speakingMessageId === message.id}
-                                      size="sm"
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      <Volume2 className="w-3 h-3 mr-1" />
-                                      {isSpeaking && speakingMessageId === message.id ? 'Speaking...' : 'Read Aloud'}
-                                    </Button>
-                                    
-                                    {isSpeaking && speakingMessageId === message.id && (
-                                      <Button
-                                        onClick={stopSpeaking}
-                                        size="sm"
-                                        variant="destructive"
-                                        className="text-xs"
-                                      >
-                                        <VolumeX className="w-3 h-3 mr-1" />
-                                        Stop
-                                      </Button>
-                                    )}
-                                  </div>
-                               </div>
-                             ) : (
-                               <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                                 {message.content}
-                               </p>
-                             )}
-                           </div>
-                          <div className="flex items-center justify-between mt-3">
-                            <p className={`text-xs ${
-                              message.isUser ? "text-primary-foreground/70" : "text-muted-foreground"
-                            }`}>
-                              {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </p>
-                            <button
-                              onClick={() => copyToClipboard(message.content, message.id)}
-                              className={`opacity-0 group-hover:opacity-100 transition-all duration-200 p-1.5 rounded-md hover:bg-accent/50 ${
-                                message.isUser ? 'text-primary-foreground/70 hover:text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
-                              }`}
-                              title="Copy message"
-                            >
-                              {copiedMessageId === message.id ? (
-                                <Check className="h-3 w-3" />
-                              ) : (
-                                <Copy className="h-3 w-3" />
-                              )}
-                            </button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-                ))}
-                 
-                {isLoading && (
-                  <div className="flex justify-start animate-fade-in">
-                    <div className="flex items-start space-x-3 max-w-3xl">
-                      <Avatar className="h-8 w-8 mt-1">
-                        <AvatarFallback className="bg-gradient-accent text-accent-foreground">
-                          <ChefHat className="h-4 w-4" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <Card className="bg-background/80 backdrop-blur-md border-border/30 shadow-card">
-                        <CardContent className="p-4">
-                          <div className="flex items-center space-x-2">
-                            <div className="flex space-x-1">
-                              <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-                              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        </Avatar>
+                        <Card className="bg-background/80 backdrop-blur-md border-border/30 shadow-card">
+                          <CardContent className="p-4">
+                            <div className="flex items-center space-x-2">
+                              <div className="flex space-x-1">
+                                <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                              </div>
+                              <span className="text-sm text-muted-foreground">Cooksy is thinking...</span>
                             </div>
-                            <span className="text-sm text-muted-foreground">AI is thinking...</span>
-                          </div>
-                        </CardContent>
-                      </Card>
+                          </CardContent>
+                        </Card>
+                      </div>
                     </div>
-                  </div>
-                )}
-                
-                <div ref={messagesEndRef} />
+                  )}
+                  
+                  <div ref={messagesEndRef} />
                 </div>
 
                 {/* Input Area for Chat Messages */}
@@ -1006,7 +800,6 @@ Please provide a detailed, helpful, and engaging response focused on cooking and
                 </div>
               </div>
             )}
-
 
             {/* Fixed Input Area for Welcome Screen */}
             {messages.length === 0 && (

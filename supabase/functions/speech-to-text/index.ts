@@ -48,7 +48,7 @@ serve(async (req) => {
       throw new Error('No audio data provided');
     }
 
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    const openAIApiKey = Deno.env.get('OpenAiKey');
     if (!openAIApiKey) {
       throw new Error('OpenAI API key is not configured');
     }
