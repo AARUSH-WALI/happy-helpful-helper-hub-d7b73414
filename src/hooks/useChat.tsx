@@ -143,7 +143,7 @@ export const useChat = () => {
 
       // Create user message
       const userMessage: ChatMessage = {
-        id: `user_${Date.now()}`,
+        id: crypto.randomUUID(),
         content,
         role: 'user',
         timestamp: new Date(),
@@ -185,7 +185,7 @@ export const useChat = () => {
 
       // Create assistant message
       const assistantMessage: ChatMessage = {
-        id: `assistant_${Date.now()}`,
+        id: crypto.randomUUID(),
         content: data.message,
         role: 'assistant',
         timestamp: new Date(),
