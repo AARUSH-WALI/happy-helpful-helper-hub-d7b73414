@@ -63,6 +63,7 @@ Focus on cooking, food, recipes, kitchen techniques, meal planning, and culinary
     ];
 
     console.log('Sending request to OpenAI with messages:', openAIMessages.length);
+    console.log('OpenAI API Key available:', !!openAIApiKey);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
