@@ -119,9 +119,11 @@ export const useChat = () => {
   const sendMessage = useCallback(async (content: string, sessionId?: string): Promise<ChatMessage | null> => {
     try {
       setIsLoading(true);
+      console.log('Starting sendMessage with content:', content);
 
       // Get user profile for context
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('User authenticated:', !!user);
       if (!user) throw new Error('User not authenticated');
 
       const { data: profile } = await supabase
@@ -163,6 +165,7 @@ export const useChat = () => {
       const conversationMessages = [...messages, userMessage].slice(-10); // Last 10 messages
 
       // Call OpenAI function
+      console.log('Calling chat-openai function with messages:', conversationMessages.length);
       const { data, error } = await supabase.functions.invoke('chat-openai', {
         body: {
           messages: conversationMessages.map(msg => ({
@@ -173,6 +176,7 @@ export const useChat = () => {
         }
       });
 
+      console.log('OpenAI function response:', { data, error });
       if (error) throw error;
 
       if (!data.message) {
@@ -198,7 +202,7 @@ export const useChat = () => {
       console.error('Error sending message:', error);
       toast({
         title: "Error",
-        description: "Failed to send message",
+        description: `Failed to send message: ${error.message}`,
         variant: "destructive"
       });
       return null;
